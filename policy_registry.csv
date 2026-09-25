@@ -1,0 +1,21 @@
+policy_id,title,version,status,effective_date,supersedes,precedence_level,precedence_label,owner_department,file_name,file_format
+P01,Refund Policy,2.0,Active,2026-01-01,P02 (Refund Policy v1.0),4,General policy,Billing,P01_Refund_Policy_v2.0.docx,docx
+P02,Refund Policy,1.0,Old,2025-01-01,,4,General policy,Billing,P02_Refund_Policy_v1.0.pdf,pdf
+P03,Refund Policy,3.0,Draft,2026-11-01,P01 (Refund Policy v2.0),4,General policy,Billing,P03_Refund_Policy_v3.0.pdf,pdf
+P04,Damaged Items Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Returns,P04_Damaged_Items_Policy_v1.0.docx,docx
+P05,Wrong or Missing Item Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Returns,P05_Wrong_or_Missing_Item_Policy_v1.0.docx,docx
+P06,Shipping and Delivery Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Shipping,P06_Shipping_and_Delivery_Policy_v1.0.pdf,pdf
+P07,Late Delivery Compensation Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Shipping,P07_Late_Delivery_Compensation_Policy_v1.0.docx,docx
+P08,"Lost, Stolen or Undelivered Packages Policy",1.0,Active,2026-01-01,,3,Specific operational policy,Shipping,P08_Lost_Stolen_or_Undelivered_Packages_Policy_v1.0.pdf,pdf
+P09,Billing Errors and Payment Disputes Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Billing,P09_Billing_Errors_and_Payment_Disputes_Policy_v1.0.docx,docx
+P10,Payment Failures and Pending Charges Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Billing,P10_Payment_Failures_and_Pending_Charges_Policy_v1.0.docx,docx
+P11,Safety Incident Policy,1.2,Active,2026-03-01,P11 v1.1,1,Safety (highest),Safety,P11_Safety_Incident_Policy_v1.2.docx,docx
+P12,Warranty Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Technical Support,P12_Warranty_Policy_v1.0.pdf,pdf
+P13,Technical Support Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Technical Support,P13_Technical_Support_Policy_v1.0.docx,docx
+P14,Compensation and Goodwill Policy,1.1,Active,2026-01-01,P14 v1.0,2,Compliance and authority limits,Management,P14_Compensation_and_Goodwill_Policy_v1.1.docx,docx
+P15,Escalation Policy,1.0,Active,2026-01-01,,2,Compliance and authority limits,Management,P15_Escalation_Policy_v1.0.docx,docx
+P16,Urgency and SLA Policy,1.0,Active,2026-01-01,,4,General policy,Operations,P16_Urgency_and_SLA_Policy_v1.0.pdf,pdf
+P17,Replacement Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Returns,P17_Replacement_Policy_v1.0.docx,docx
+P18,Order Cancellation Policy,1.0,Active,2026-01-01,,3,Specific operational policy,Billing,P18_Order_Cancellation_Policy_v1.0.docx,docx
+P19,Customer Communication and Privacy Policy,1.0,Active,2026-01-01,,2,Compliance and authority limits,Compliance,P19_Customer_Communication_and_Privacy_Policy_v1.0.pdf,pdf
+P20,"Promotions, Coupons and Price Adjustments Policy",1.0,Active,2026-01-01,,3,Specific operational policy,Billing,P20_Promotions_Coupons_and_Price_Adjustments_Policy_v1.0.pdf,pdf

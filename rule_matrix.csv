@@ -1,0 +1,101 @@
+rule_id,category,subcategory,condition,department,urgency,escalate,refund_allowed,refund_window_days,replacement_allowed,max_compensation_usd,compensation_type,approval_level,proof_required,sla_first_response_hours,sla_resolution_hours,policy_id,related_policy_ids
+R001,Damaged Product,Damaged on arrival,"Reported within 7 days of delivery, photos provided",Returns,Medium,No,Yes,30,Yes,0,None,Agent,Yes,8,72,P04,
+R002,Damaged Product,Damaged on arrival,"Reported within 7 days of delivery, no photos provided",Returns,Medium,No,Conditional,30,Conditional,0,None,Agent,Yes,8,72,P04,
+R003,Damaged Product,Damaged on arrival,"Reported 8 to 30 days after delivery, photos provided",Returns,Medium,No,Yes,30,Conditional,0,None,Agent,Yes,8,72,P04,P01
+R004,Damaged Product,Damaged on arrival,Reported more than 30 days after delivery,Returns,Low,No,No,,No,0,None,Agent,No,24,168,P04,
+R005,Damaged Product,Cracked screen on arrival,"Reported within 7 days of delivery, photos provided",Returns,Medium,No,Yes,30,Yes,0,None,Agent,Yes,8,72,P04,
+R006,Damaged Product,Damage caused by customer,Customer admits dropping or mishandling the device,Returns,Low,No,No,,No,0,None,Agent,No,24,168,P04,P12
+R007,Damaged Product,Damaged packaging only,Item works; only the box is damaged,Returns,Low,No,No,,No,0,None,Agent,No,24,168,P04,
+R008,Damaged Product,Dead on arrival,"Device does not power on, within 30 days of delivery",Returns,Medium,No,Yes,30,Yes,0,None,Agent,No,8,72,P01,P13
+R009,Damaged Product,Wrong item received,Reported within 14 days of delivery,Returns,Medium,No,Yes,30,Yes,5,Store credit,Agent,Yes,8,72,P05,
+R010,Damaged Product,Wrong item received,Reported more than 14 days after delivery,Returns,Low,No,Conditional,30,Conditional,0,None,Agent,Yes,24,168,P05,
+R011,Damaged Product,Missing accessory,"Charger, cable or case missing, reported within 14 days",Returns,Low,No,No,,Yes,0,None,Agent,No,24,168,P05,
+R012,Damaged Product,Missing item in multi-item order,"Item missing from parcel, reported within 14 days",Returns,Medium,No,Conditional,30,Yes,5,Store credit,Agent,Yes,8,72,P05,
+R013,Damaged Product,Used or refurbished item sent as new,Signs of prior use on an item sold as new,Returns,Medium,No,Yes,30,Yes,10,Store credit,Agent,Yes,8,72,P05,
+R014,Damaged Product,Damaged high-value item,"Damaged on arrival, order value above $1,000",Returns,Medium,Yes,Yes,30,Yes,0,None,Manager,Yes,8,72,P04,P15
+R015,Damaged Product,Damaged on arrival,"Customer wants replacement only, photos provided",Returns,Medium,No,Yes,30,Yes,0,None,Agent,Yes,8,72,P17,P04
+R016,Damaged Product,Replacement also faulty,Replacement item arrived damaged or faulty,Returns,High,Yes,Yes,30,Conditional,10,Store credit,Agent,Yes,1,24,P17,P15
+R017,Damaged Product,Replacement out of stock,"Damaged item, replacement unavailable",Returns,Medium,No,Yes,30,Conditional,0,None,Agent,No,8,72,P17,
+R018,Damaged Product,Return label request,"Damaged item, customer asks for a return shipping label",Returns,Low,No,Yes,30,Yes,0,None,Agent,No,24,168,P04,
+R019,Refund Request,Standard refund,"Unused item, within 30 days of delivery",Billing,Low,No,Yes,30,No,0,None,Agent,No,24,168,P01,
+R020,Refund Request,Standard refund,"Unused item, more than 30 days after delivery",Billing,Low,No,No,,No,0,None,Agent,No,24,168,P01,
+R021,Refund Request,Opened non-defective item,Within 15 days of delivery (15% restocking fee applies),Billing,Low,No,Conditional,15,No,0,None,Agent,No,24,168,P01,
+R022,Refund Request,Opened non-defective item,16 to 30 days after delivery,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P01,
+R023,Refund Request,Defective item,"Faulty within 30 days, troubleshooting already tried",Billing,Medium,No,Yes,30,Yes,0,None,Agent,No,8,72,P01,P13
+R024,Refund Request,Defective item after return window,"Fault after 30 days, within 12-month warranty",Billing,Medium,No,No,,Conditional,0,None,Agent,No,8,72,P12,P01
+R025,Refund Request,Refund status enquiry,"Refund approved, within 7 business days",Billing,Low,No,Yes,,No,0,None,Agent,No,24,168,P01,
+R026,Refund Request,Refund delayed,Approved refund not received after 10 business days,Billing,Medium,No,Yes,,No,5,Store credit,Agent,No,8,72,P01,P14
+R027,Refund Request,Refund to different method,Customer asks for refund to another card or account,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P01,
+R028,Refund Request,Gift purchase,Gift recipient (not the buyer) requests a return,Billing,Low,No,Conditional,30,No,0,None,Agent,No,24,168,P01,
+R029,Refund Request,Non-refundable item,Gift card or digital product,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P01,
+R030,Refund Request,Clearance item,"Final-sale item, not defective",Billing,Low,No,No,,No,0,None,Agent,No,24,168,P01,
+R031,Refund Request,Cash compensation demand,Customer demands cash on top of a valid refund,Billing,Medium,No,Yes,30,No,0,None,Agent,No,8,72,P14,P01
+R032,Refund Request,Compensation above authority,Customer demands more than $50 compensation,Billing,Medium,Yes,Conditional,30,No,50,Store credit,Manager,No,8,72,P14,P15
+R033,Refund Request,Partial return,"One item from a multi-item order, within 30 days",Billing,Low,No,Yes,30,No,0,None,Agent,No,24,168,P01,
+R034,Refund Request,Chargeback filed,Customer has opened a bank dispute,Billing,Medium,Yes,No,,No,0,None,Agent,No,8,72,P09,P15
+R035,Billing Error,Duplicate charge,"Charged twice for the same order, within 60 days",Billing,Medium,No,Yes,60,No,0,None,Agent,No,8,72,P09,
+R036,Billing Error,Duplicate charge unresolved,Duplicate charge still not refunded after 5 business days,Billing,High,No,Yes,60,No,5,Store credit,Agent,No,1,24,P09,
+R037,Billing Error,Wrong amount charged,Charged more than the listed price,Billing,Medium,No,Yes,60,No,0,None,Agent,No,8,72,P09,
+R038,Billing Error,Charged after cancellation,Order cancelled but payment still taken,Billing,Medium,No,Yes,60,No,0,None,Agent,No,8,72,P18,
+R039,Billing Error,Payment failed but money taken,"Error shown at checkout, amount deducted, no order",Billing,Medium,No,Yes,,No,0,None,Agent,No,8,72,P10,
+R040,Billing Error,Pending authorization hold,Bank hold not yet released,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P10,
+R041,Billing Error,Unrecognised charge,Customer does not recognise a VoltCart charge,Billing,High,Yes,Conditional,60,No,0,None,Agent,No,1,24,P09,P15
+R042,Billing Error,Suspected fraud,Customer says their card was used without permission,Billing,High,Yes,Conditional,60,No,0,None,Agent,No,1,24,P09,P15
+R043,Billing Error,Wrong tax or shipping fee,Shipping fee charged on an order that qualified for free shipping,Billing,Low,No,Yes,60,No,0,None,Agent,No,24,168,P09,P06
+R044,Billing Error,Promo code not applied,Valid promo code did not apply at checkout,Billing,Low,No,Conditional,14,No,0,None,Agent,No,24,168,P20,
+R045,Billing Error,Price adjustment,Price dropped within 14 days of purchase,Billing,Low,No,Yes,14,No,0,None,Agent,No,24,168,P20,
+R046,Billing Error,Price adjustment,Price dropped more than 14 days after purchase,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P20,
+R047,Billing Error,Invoice or receipt request,"Customer needs a document, not a refund",Billing,Low,No,N/A,,N/A,0,None,Agent,No,24,168,P09,
+R048,Billing Error,Extended warranty charged without consent,Warranty add-on the customer did not choose,Billing,Medium,No,Yes,60,No,0,None,Agent,No,8,72,P09,P12
+R049,Billing Error,Currency conversion or bank fee,Fee charged by the customer's bank,Billing,Low,No,No,,No,0,None,Agent,No,24,168,P09,
+R050,Billing Error,Billing dispute with legal threat,"Overcharge unresolved, customer threatens legal action",Billing,High,Yes,Conditional,,No,0,None,Agent,No,1,24,P15,P09
+R051,Shipping Delay,Order in transit,Still within the estimated delivery window,Shipping,Low,No,No,,No,0,None,Agent,No,24,168,P06,
+R052,Shipping Delay,Late delivery,1 to 7 business days past the estimated date,Shipping,Low,No,No,,No,0,None,Agent,No,24,168,P07,
+R053,Shipping Delay,Late delivery,8 to 14 business days past the estimated date,Shipping,Medium,No,Conditional,30,No,5,Store credit,Agent,No,8,72,P07,
+R054,Shipping Delay,Late delivery,More than 14 business days past the estimated date,Shipping,High,No,Yes,30,Yes,10,Store credit,Agent,No,1,24,P07,P08
+R055,Shipping Delay,Tracking not updating,No tracking movement for 5 or more days,Shipping,Medium,No,No,,No,0,None,Agent,No,8,72,P06,
+R056,Shipping Delay,Marked delivered but not received,"Tracking shows delivered, customer has nothing",Shipping,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P08,
+R057,Shipping Delay,Lost in transit,Carrier confirms the package is lost,Shipping,Medium,No,Yes,30,Yes,10,Store credit,Agent,No,8,72,P08,
+R058,Shipping Delay,Package stolen after delivery,"Delivery confirmed, then stolen from the doorstep",Shipping,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P08,
+R059,Shipping Delay,Wrong address entered by customer,Order delivered to the address the customer typed,Shipping,Low,No,No,,No,0,None,Agent,No,24,168,P06,
+R060,Shipping Delay,Address change request,Order not yet shipped,Shipping,Low,No,N/A,,N/A,0,None,Agent,No,24,168,P06,
+R061,Shipping Delay,Express delivery late,Express order arrived more than 2 business days after dispatch,Shipping,Medium,No,Yes,30,No,5,Store credit,Agent,No,8,72,P06,P07
+R062,Shipping Delay,Order stuck in processing,Not dispatched after 3 business days,Shipping,Medium,No,Conditional,30,No,0,None,Agent,No,8,72,P06,
+R063,Shipping Delay,Partial shipment,"Order split into parcels, second parcel delayed",Shipping,Low,No,Conditional,30,No,0,None,Agent,No,24,168,P06,
+R064,Shipping Delay,Customs delay,International order held by customs,Shipping,Low,No,No,,No,0,None,Agent,No,24,168,P06,
+R065,Shipping Delay,Missed delivery attempt,Courier failed to deliver or left a card,Shipping,Low,No,No,,No,0,None,Agent,No,24,168,P06,
+R066,Shipping Delay,Time-critical delivery delayed,Customer needs the item for a specific event date,Shipping,Medium,No,Conditional,30,No,5,Store credit,Agent,No,8,72,P07,
+R067,Safety Issue,Overheating,Device or charger gets dangerously hot,Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R068,Safety Issue,Smoke or fire,Smoke or flames from the device,Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R069,Safety Issue,Battery swelling,Battery bulging or pushing the case apart,Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R070,Safety Issue,Electric shock,Customer received an electric shock,Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R071,Safety Issue,Physical injury,Customer was injured by the device,Safety,High,Yes,Yes,Any,No,100,Store credit,Admin,No,1,24,P11,P15
+R072,Safety Issue,Property damage caused by device,Device damaged the customer's property,Safety,High,Yes,Yes,Any,No,100,Store credit,Admin,No,1,24,P11,P15
+R073,Safety Issue,Product recall enquiry,Customer asks whether their product is recalled,Safety,Medium,No,Yes,Any,Yes,0,None,Agent,No,8,72,P11,
+R074,Safety Issue,Child safety,"Child chewed, swallowed or handled a dangerous part",Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R075,Safety Issue,Suspected counterfeit or unsafe accessory,"No safety markings, product looks fake",Safety,Medium,Yes,Yes,Any,Yes,0,None,Agent,No,8,72,P11,
+R076,Safety Issue,Burning smell,"Smell only, no visible smoke or fire",Safety,High,Yes,Yes,Any,No,20,Store credit,Manager,No,1,24,P11,
+R077,Safety Issue,Sparking,Sparks when plugged into a socket,Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,
+R078,Safety Issue,Warm during normal use,"Mildly warm only, no smell, smoke or swelling",Safety,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P11,P13
+R079,Safety Issue,Safety complaint with media threat,"Hazard reported, customer threatens to go to the media",Safety,High,Yes,Yes,Any,No,50,Store credit,Manager,No,1,24,P11,P15
+R080,Safety Issue,Safety complaint with legal threat,"Hazard and property damage, customer threatens legal action",Safety,High,Yes,Yes,Any,No,100,Store credit,Admin,No,1,24,P11,P15
+R081,Safety Issue,Second safety incident,Replacement device also overheated,Safety,High,Yes,Yes,Any,No,100,Store credit,Admin,No,1,24,P11,P17
+R082,Safety Issue,Explosion or loud pop,Loud bang or hissing while charging,Safety,High,Yes,Yes,Any,No,100,Store credit,Admin,No,1,24,P11,
+R083,Technical Problem,Stopped working within 30 days,Customer asks for troubleshooting help,Technical Support,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P13,
+R084,Technical Problem,Stopped working 31 days to 12 months,Within the 12-month warranty period,Technical Support,Medium,No,No,,Yes,0,None,Agent,Yes,8,72,P12,
+R085,Technical Problem,Stopped working after warranty,More than 12 months after delivery,Technical Support,Low,No,No,,No,0,None,Agent,No,24,168,P12,
+R086,Technical Problem,Water or liquid damage,Liquid damage caused by the customer,Technical Support,Low,No,No,,No,0,None,Agent,No,24,168,P12,
+R087,Technical Problem,Battery drains quickly,Battery health problem within 12 months,Technical Support,Low,No,No,,Conditional,0,None,Agent,No,24,168,P12,
+R088,Technical Problem,Bluetooth or pairing problem,"Connectivity issue, standard steps not yet exhausted",Technical Support,Low,No,No,,No,0,None,Agent,No,24,168,P13,
+R089,Technical Problem,Software or firmware problem,Restarts or bugs after an update,Technical Support,Low,No,No,,No,0,None,Agent,No,24,168,P13,
+R090,Technical Problem,Setup or how-to question,Customer needs instructions,Technical Support,Low,No,N/A,,N/A,0,None,Agent,No,24,168,P13,
+R091,Technical Problem,Charging problem,Charger or cable stopped charging within 30 days,Technical Support,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P13,
+R092,Technical Problem,Screen flickering or dead pixels,Display defect within 30 days,Technical Support,Medium,No,Yes,30,Yes,0,None,Agent,No,8,72,P13,
+R093,Technical Problem,One earbud not working,Audio defect within 30 days,Technical Support,Medium,No,Yes,30,Yes,0,None,Agent,No,8,72,P13,
+R094,Technical Problem,Laptop crashing,Repeated crashes within 30 days,Technical Support,Medium,No,Conditional,30,Conditional,0,None,Agent,No,8,72,P13,
+R095,Technical Problem,Unresolved after 3 or more contacts,Same problem reported three or more times,Technical Support,High,Yes,Conditional,30,Yes,0,None,Agent,No,1,24,P15,P13
+R096,Technical Problem,App or account login problem,Cannot sign in to VoltCart account or app,Technical Support,Low,No,N/A,,N/A,0,None,Agent,No,24,168,P13,
+R097,Technical Problem,Product not compatible,"Opened, not faulty, within 15 days (restocking fee applies)",Technical Support,Low,No,Conditional,15,No,0,None,Agent,No,24,168,P01,P13
+R098,Technical Problem,Data loss on device,Data lost after a software update,Technical Support,Medium,No,No,,No,0,None,Agent,No,8,72,P13,
+R099,Technical Problem,Warranty claim without proof of purchase,No order number or receipt available,Technical Support,Low,No,No,,Conditional,0,None,Agent,Yes,24,168,P12,
+R100,Technical Problem,Repair status enquiry,Customer asks about a warranty repair in progress,Technical Support,Low,No,N/A,,N/A,0,None,Agent,No,24,168,P12,
