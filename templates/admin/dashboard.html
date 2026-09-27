@@ -1,0 +1,585 @@
+{% extends "supportnova_base.html" %}
+
+{% block title %}Operations Dashboard — SupportNova{% endblock %}
+
+{% block user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Overview</div>
+    <a href="/admin/dashboard" class="sn-nav-link active" aria-current="page">
+        <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a href="/admin/complaints" class="sn-nav-link">
+        <i class="fas fa-inbox"></i> Complaints
+    </a>
+    <a href="/admin/analytics" class="sn-nav-link">
+        <i class="fas fa-chart-bar"></i> Analytics
+    </a>
+    <a href="/admin/analytics#trends" class="sn-nav-link">
+        <i class="fas fa-arrow-trend-up"></i> Trend Analysis
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Operations</div>
+    <a href="/admin/manual-review" class="sn-nav-link">
+        <i class="fas fa-user-check"></i> Manual Review
+        <span class="sn-nav-badge" style="background: var(--sn-ai-color);">18</span>
+    </a>
+    <a href="/admin/sla" class="sn-nav-link">
+        <i class="fas fa-clock"></i> SLA Monitoring
+    </a>
+    <a href="/admin/search" class="sn-nav-link">
+        <i class="fas fa-search"></i> Search &amp; Filter
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">System</div>
+    <a href="/admin/ai-analysis" class="sn-nav-link">
+        <i class="fas fa-code-branch"></i> AI/Validation Analysis
+    </a>
+    <a href="/admin/reports" class="sn-nav-link">
+        <i class="fas fa-file-chart-column"></i> Reports
+    </a>
+    <a href="/admin/settings" class="sn-nav-link">
+        <i class="fas fa-gear"></i> Settings
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{# BACKEND INTEGRATION: page data from Flask context — current_user.role must be 'admin' or 'manager' #}
+
+<!-- ── Page Header ────────────────────────────────────────────── -->
+<div class="sn-page-header">
+    <div>
+        <h1 class="sn-page-title">
+            <i class="fas fa-chart-line" style="color: var(--sn-accent); margin-right: 0.5rem; font-size: 1.2rem;"></i>
+            Operations Dashboard
+        </h1>
+        <p class="sn-page-subtitle">VoltCart Support Operations &mdash; Last 30 days</p>
+    </div>
+    <div class="sn-page-actions">
+        <!-- Date Range Selector -->
+        <div class="sn-date-range-btns" role="group" aria-label="Date range">
+            <button class="sn-btn sn-btn-outline sn-btn-sm date-range-btn" data-range="7" aria-pressed="false">7 Days</button>
+            <button class="sn-btn sn-btn-primary sn-btn-sm date-range-btn active" data-range="30" aria-pressed="true">30 Days</button>
+            <button class="sn-btn sn-btn-outline sn-btn-sm date-range-btn" data-range="90" aria-pressed="false">90 Days</button>
+        </div>
+        <button class="sn-btn sn-btn-outline sn-btn-sm" id="btn-refresh-dashboard" aria-label="Refresh dashboard">
+            <i class="fas fa-rotate-right"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- ── Row 1: KPI Stat Cards ─────────────────────────────────── -->
+{# BACKEND INTEGRATION: Stats from GET /api/analytics/summary — map to MOCK_DATA.analytics.summary #}
+<div class="sn-stats-grid" id="kpi-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+
+    <!-- Total Complaints -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-accent);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-accent-light); color: var(--sn-accent);">
+            <i class="fas fa-inbox"></i>
+        </div>
+        <div class="sn-stat-label">Total Complaints</div>
+        <div class="sn-stat-value" id="kpi-total">1,284</div>
+        <div class="sn-stat-change neutral"><i class="fas fa-calendar-days"></i> Last 30 days</div>
+    </div>
+
+    <!-- Open -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-info);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-info-light); color: var(--sn-info);">
+            <i class="fas fa-folder-open"></i>
+        </div>
+        <div class="sn-stat-label">Open</div>
+        <div class="sn-stat-value" id="kpi-open" style="color: var(--sn-info);">387</div>
+        <div class="sn-stat-change neutral"><i class="fas fa-circle-dot"></i> Active cases</div>
+    </div>
+
+    <!-- Resolved -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-success);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-success-light); color: var(--sn-success);">
+            <i class="fas fa-circle-check"></i>
+        </div>
+        <div class="sn-stat-label">Resolved</div>
+        <div class="sn-stat-value" id="kpi-resolved" style="color: var(--sn-success);">842</div>
+        <div class="sn-stat-change positive"><i class="fas fa-arrow-up"></i> +12% vs last period</div>
+    </div>
+
+    <!-- Escalated -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-danger);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-danger-light); color: var(--sn-danger);">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <div class="sn-stat-label">Escalated</div>
+        <div class="sn-stat-value" id="kpi-escalated" style="color: var(--sn-danger);">55</div>
+        <div class="sn-stat-change negative"><i class="fas fa-arrow-up"></i> Needs attention</div>
+    </div>
+
+    <!-- Manual Review -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-ai-color);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-ai-light); color: var(--sn-ai-color);">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="sn-stat-label">Manual Review</div>
+        <div class="sn-stat-value" id="kpi-manual" style="color: var(--sn-ai-color);">18</div>
+        <div class="sn-stat-change neutral"><i class="fas fa-clock"></i> Awaiting review</div>
+    </div>
+
+    <!-- SLA Risk -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-warning);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-warning-light); color: var(--sn-warning);">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="sn-stat-label">SLA Risk</div>
+        <div class="sn-stat-value" id="kpi-sla-risk" style="color: var(--sn-warning);">23</div>
+        <div class="sn-stat-change negative"><i class="fas fa-arrow-trend-up"></i> At risk of breach</div>
+    </div>
+
+    <!-- AI/Python Mismatch -->
+    <div class="sn-stat-card">
+        <div class="sn-stat-card-accent" style="background: var(--sn-ai-color);"></div>
+        <div class="sn-stat-icon" style="background: var(--sn-ai-light); color: var(--sn-ai-color);">
+            <i class="fas fa-code-branch"></i>
+        </div>
+        <div class="sn-stat-label">AI/Python Mismatch</div>
+        <div class="sn-stat-value" id="kpi-mismatch" style="color: var(--sn-ai-color);">42</div>
+        <div class="sn-stat-change neutral"><i class="fas fa-robot"></i> Validation flags</div>
+    </div>
+
+</div>
+
+<!-- ── Row 2: Main Charts ──────────────────────────────────────── -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--sn-md); margin-bottom: var(--sn-xl);">
+
+    <!-- Complaint Volume Line Chart -->
+    <div class="sn-chart-card">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-chart-line" style="color: var(--sn-accent);"></i>
+                Complaint Volume &mdash; Last 7 Days
+            </h2>
+            <span class="sn-badge" style="background: var(--sn-accent-light); color: var(--sn-accent);">
+                {# BACKEND INTEGRATION: GET /api/analytics/trends #}
+                Live Data
+            </span>
+        </div>
+        <div class="sn-chart-body" style="flex-direction: column; align-items: stretch; padding: var(--sn-lg);">
+            <div id="chart-volume-line" style="width: 100%;"></div>
+            <!-- Legend -->
+            <div style="display: flex; gap: var(--sn-lg); margin-top: var(--sn-sm); flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--sn-text-muted);">
+                    <span style="width: 12px; height: 3px; background: #4F7FFF; border-radius: 2px; display: inline-block;"></span> Total
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--sn-text-muted);">
+                    <span style="width: 12px; height: 3px; background: #10B981; border-radius: 2px; display: inline-block;"></span> Resolved
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--sn-text-muted);">
+                    <span style="width: 12px; height: 3px; background: #EF4444; border-radius: 2px; display: inline-block;"></span> Escalated
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- By Category Donut Chart -->
+    <div class="sn-chart-card">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-chart-pie" style="color: var(--sn-accent);"></i>
+                By Category
+            </h2>
+        </div>
+        <div class="sn-chart-body" style="min-height: 200px;">
+            {# BACKEND INTEGRATION: GET /api/analytics/categories #}
+            <div id="chart-category-donut" style="width: 100%;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Row 3: Priority / Department / Sentiment ───────────────── -->
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sn-md); margin-bottom: var(--sn-xl);">
+
+    <!-- Priority Distribution -->
+    <div class="sn-chart-card">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-signal" style="color: var(--sn-warning);"></i>
+                Priority Distribution
+            </h2>
+        </div>
+        <div class="sn-chart-body" style="min-height: 180px; padding: var(--sn-md) var(--sn-lg);">
+            {# BACKEND INTEGRATION: GET /api/analytics/priority #}
+            <div id="chart-priority-bar" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- By Department (CSS Progress Bars) -->
+    <div class="sn-chart-card">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-building" style="color: var(--sn-rule-color);"></i>
+                By Department
+            </h2>
+        </div>
+        <div class="sn-chart-body" style="flex-direction: column; align-items: stretch; padding: var(--sn-md) var(--sn-lg); gap: var(--sn-sm); min-height: 180px;">
+            {# BACKEND INTEGRATION: GET /api/analytics/departments — data from MOCK_DATA.analytics.byDepartment #}
+            <div id="dept-progress-bars" style="width: 100%; display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+    </div>
+
+    <!-- Sentiment Distribution -->
+    <div class="sn-chart-card">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-face-smile" style="color: var(--sn-success);"></i>
+                Sentiment Distribution
+            </h2>
+        </div>
+        <div class="sn-chart-body" style="min-height: 180px; padding: var(--sn-md) var(--sn-lg);">
+            {# BACKEND INTEGRATION: GET /api/analytics/sentiment #}
+            <div id="chart-sentiment-bar" style="width: 100%;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Row 4: AI / Validation Stats ──────────────────────────── -->
+{# BACKEND INTEGRATION: GET /api/analytics/ai-comparison — data from MOCK_DATA.analytics.aiComparison #}
+<div class="sn-card sn-ai-card" style="margin-bottom: var(--sn-xl);" aria-label="AI vs Rule Engine Performance">
+    <div class="sn-card-header">
+        <h2 class="sn-card-title">
+            <i class="fas fa-robot" style="color: var(--sn-ai-color);"></i>
+            AI vs Rule Engine Performance
+        </h2>
+        <span class="sn-badge sn-badge-ai" style="font-size: 0.7rem;">
+            <i class="fas fa-circle" style="font-size: 0.5rem; animation: pulse 2s infinite;"></i>
+            Live Monitoring
+        </span>
+    </div>
+    <div class="sn-card-body">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: var(--sn-xl); align-items: center; flex-wrap: wrap;">
+            <!-- Stats Row -->
+            <div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--sn-md); margin-bottom: var(--sn-lg);">
+                    <div style="text-align: center; padding: var(--sn-md); background: var(--sn-surface-2); border-radius: var(--sn-radius-md);">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--sn-primary);" id="ai-total-analyzed">1,240</div>
+                        <div style="font-size: 0.7rem; color: var(--sn-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Total Analyzed</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--sn-md); background: var(--sn-success-light); border-radius: var(--sn-radius-md);">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--sn-success);" id="ai-fully-verified">1,082</div>
+                        <div style="font-size: 0.7rem; color: var(--sn-success); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Fully Verified</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--sn-md); background: var(--sn-warning-light); border-radius: var(--sn-radius-md);">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--sn-warning);" id="ai-partial-match">116</div>
+                        <div style="font-size: 0.7rem; color: var(--sn-warning); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Partial Match</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--sn-md); background: var(--sn-ai-light); border-radius: var(--sn-radius-md);">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--sn-ai-color);" id="ai-manual-review">42</div>
+                        <div style="font-size: 0.7rem; color: var(--sn-ai-color); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Manual Review</div>
+                    </div>
+                </div>
+                <!-- Verification Progress Bar -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.8rem; color: var(--sn-text-muted); font-weight: 600;">Verification Rate</span>
+                        <span style="font-size: 0.8rem; color: var(--sn-success); font-weight: 700;" id="ai-verification-rate-pct">87.3%</span>
+                    </div>
+                    <div style="height: 8px; background: var(--sn-border); border-radius: 4px; overflow: hidden;">
+                        <div id="ai-verification-bar" style="height: 100%; width: 87.3%; background: linear-gradient(90deg, var(--sn-success), #34d399); border-radius: 4px; transition: width 0.8s ease;"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Big Verification Rate Number -->
+            <div style="text-align: center; padding: var(--sn-xl); background: var(--sn-success-light); border-radius: var(--sn-radius-xl); min-width: 140px;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--sn-success); line-height: 1;" id="ai-verification-rate-big">87.3%</div>
+                <div style="font-size: 0.75rem; color: var(--sn-success); font-weight: 600; margin-top: 6px;">AI Verification Rate</div>
+            </div>
+        </div>
+    </div>
+    <div class="sn-card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="sn-text-xs sn-text-muted">
+            <i class="fas fa-info-circle"></i>
+            {# BACKEND INTEGRATION: GET /api/analytics/ai-comparison #}
+            Data refreshes every 5 minutes from the validation engine.
+        </span>
+        <a href="/admin/ai-analysis" class="sn-btn sn-btn-outline sn-btn-sm">
+            <i class="fas fa-external-link-alt"></i> Full AI Report
+        </a>
+    </div>
+</div>
+
+<!-- ── Row 5: SLA Status ──────────────────────────────────────── -->
+{# BACKEND INTEGRATION: GET /api/analytics/sla — data from MOCK_DATA.analytics.slaStatus #}
+<div class="sn-card" style="margin-bottom: var(--sn-xl);" aria-label="SLA Status">
+    <div class="sn-card-header">
+        <h2 class="sn-card-title">
+            <i class="fas fa-clock" style="color: var(--sn-warning);"></i>
+            SLA Status
+        </h2>
+        <a href="/admin/sla" class="sn-btn sn-btn-outline sn-btn-sm">
+            <i class="fas fa-arrow-right"></i> Monitor SLA
+        </a>
+    </div>
+    <div class="sn-card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sn-lg);">
+
+            <!-- On Track -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 10px; height: 10px; background: var(--sn-success); border-radius: 50%; display: inline-block;"></span>
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--sn-text);">On Track</span>
+                    </div>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--sn-success);" id="sla-on-track">1,068</span>
+                </div>
+                <div style="height: 8px; background: var(--sn-border); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: 83.2%; background: var(--sn-success); border-radius: 4px;"></div>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--sn-text-muted); margin-top: 4px;">83.2% of total</div>
+            </div>
+
+            <!-- At Risk -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 10px; height: 10px; background: var(--sn-warning); border-radius: 50%; display: inline-block;"></span>
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--sn-text);">At Risk</span>
+                    </div>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--sn-warning);" id="sla-at-risk">23</span>
+                </div>
+                <div style="height: 8px; background: var(--sn-border); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: 1.8%; background: var(--sn-warning); border-radius: 4px; min-width: 4px;"></div>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--sn-text-muted); margin-top: 4px;">1.8% of total</div>
+            </div>
+
+            <!-- Breached -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 10px; height: 10px; background: var(--sn-danger); border-radius: 50%; display: inline-block;"></span>
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--sn-text);">Breached</span>
+                    </div>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: var(--sn-danger);" id="sla-breached">14</span>
+                </div>
+                <div style="height: 8px; background: var(--sn-border); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: 1.1%; background: var(--sn-danger); border-radius: 4px; min-width: 4px;"></div>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--sn-text-muted); margin-top: 4px;">1.1% of total</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── Row 6: Detected Trends & Insights ──────────────────────── -->
+{# BACKEND INTEGRATION: GET /api/analytics/trends/detected — data from MOCK_DATA.analytics.detectedTrends #}
+<div style="margin-bottom: var(--sn-xl);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sn-md);">
+        <h2 style="font-size: 1rem; font-weight: 700; color: var(--sn-primary); margin: 0;">
+            <i class="fas fa-bolt" style="color: var(--sn-warning); margin-right: 0.4rem;"></i>
+            Detected Trends &amp; Insights
+        </h2>
+        <a href="/admin/analytics#trends" class="sn-btn sn-btn-outline sn-btn-sm">
+            <i class="fas fa-arrow-right"></i> Full Trend Analysis
+        </a>
+    </div>
+    <div id="trend-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sn-md);">
+        <!-- Trend cards rendered by JS -->
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
+    // ── 1. Render Line Chart (Complaint Volume) ───────────────────
+    // BACKEND INTEGRATION: data from GET /api/analytics/trends
+    SN.renderLineChart('chart-volume-line', MOCK_DATA.analytics.trends);
+
+    // ── 2. Render Donut Chart (By Category) ──────────────────────
+    // BACKEND INTEGRATION: data from GET /api/analytics/categories
+    const categoryColors = ['#4F7FFF','#10B981','#F59E0B','#EF4444','#7C3AED','#0891B2','#F97316'];
+    const categoryData = MOCK_DATA.analytics.byCategory.map(function (d, i) {
+        return { label: d.label, count: d.count, color: categoryColors[i % categoryColors.length] };
+    });
+    SN.renderDonutChart('chart-category-donut', categoryData);
+
+    // ── 3. Render Bar Charts ──────────────────────────────────────
+    // Priority
+    SN.renderBarChart('chart-priority-bar', MOCK_DATA.analytics.byPriority);
+    // Sentiment
+    SN.renderBarChart('chart-sentiment-bar', MOCK_DATA.analytics.bySentiment);
+
+    // ── 4. Render Department Progress Bars (CSS only) ─────────────
+    // BACKEND INTEGRATION: data from GET /api/analytics/departments
+    const deptContainer = document.getElementById('dept-progress-bars');
+    if (deptContainer) {
+        const depts = MOCK_DATA.analytics.byDepartment;
+        const maxDept = Math.max(...depts.map(function (d) { return d.count; }));
+        const deptColors = ['#4F7FFF','#10B981','#F59E0B','#7C3AED','#0891B2'];
+        let deptHtml = '';
+        depts.forEach(function (d, i) {
+            const pct = maxDept > 0 ? Math.round((d.count / maxDept) * 100) : 0;
+            deptHtml += `
+                <div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:0.78rem;font-weight:600;color:var(--sn-text);">${d.label}</span>
+                        <span style="font-size:0.78rem;color:var(--sn-text-muted);font-weight:700;">${d.count.toLocaleString()}</span>
+                    </div>
+                    <div style="height:6px;background:var(--sn-border);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:${deptColors[i % deptColors.length]};border-radius:3px;transition:width 0.6s ease;"></div>
+                    </div>
+                </div>
+            `;
+        });
+        deptContainer.innerHTML = deptHtml;
+    }
+
+    // ── 5. Render Trend Cards ─────────────────────────────────────
+    // BACKEND INTEGRATION: data from GET /api/analytics/trends/detected
+    const trendGrid = document.getElementById('trend-cards-grid');
+    if (trendGrid) {
+        const severityColors = {
+            critical: 'var(--sn-danger)',
+            high: 'var(--sn-warning)',
+            medium: 'var(--sn-info)',
+            low: 'var(--sn-success)',
+        };
+        const severityIcons = {
+            critical: 'fa-circle-exclamation',
+            high: 'fa-arrow-trend-up',
+            medium: 'fa-minus',
+            low: 'fa-arrow-trend-down',
+        };
+        const changeClasses = {
+            critical: 'negative',
+            high: 'negative',
+            medium: 'neutral',
+            low: 'positive',
+        };
+
+        let trendHtml = '';
+        MOCK_DATA.analytics.detectedTrends.forEach(function (trend) {
+            const color = severityColors[trend.severity] || 'var(--sn-info)';
+            const icon  = severityIcons[trend.severity]  || 'fa-minus';
+            const changeClass = changeClasses[trend.severity] || 'neutral';
+            const isPositive = changeClass === 'positive';
+            trendHtml += `
+                <div class="sn-trend-card sn-trend-severity-${trend.severity} sn-fade-in" 
+                     role="article" tabindex="0"
+                     data-trend-title="${trend.title}"
+                     style="cursor: pointer;"
+                     aria-label="Trend: ${trend.title}">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sn-sm);margin-bottom:var(--sn-sm);">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="width:28px;height:28px;background:${color};background:color-mix(in srgb,${color} 15%,white);border-radius:var(--sn-radius-md);display:flex;align-items:center;justify-content:center;color:${color};font-size:0.8rem;">
+                                <i class="fas ${icon}"></i>
+                            </span>
+                            <h3 style="font-size:0.875rem;font-weight:700;color:var(--sn-primary);margin:0;">${trend.title}</h3>
+                        </div>
+                        <span class="sn-badge" style="background:${color};background:color-mix(in srgb,${color} 12%,white);color:${color};font-size:0.7rem;">
+                            ${trend.change}
+                        </span>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--sn-text-muted);margin:0 0 var(--sn-sm);line-height:1.5;">${trend.description}</p>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--sn-sm);">
+                        <span class="sn-badge" style="background:var(--sn-surface-2);color:var(--sn-text-muted);">
+                            <i class="fas fa-tag" style="font-size:0.55rem;"></i> ${trend.category}
+                        </span>
+                        <span style="font-size:0.72rem;color:var(--sn-text-light);">
+                            <i class="fas fa-calendar-days"></i> Last ${trend.period}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+        trendGrid.innerHTML = trendHtml;
+
+        // Trend card click handler
+        trendGrid.querySelectorAll('.sn-trend-card').forEach(function (card) {
+            card.addEventListener('click', function () {
+                // BACKEND INTEGRATION: drill-down analytics will be available from the backend team
+                SN.toast('Drill-down analytics available from the backend team.', 'info');
+            });
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                }
+            });
+        });
+    }
+
+    // ── 6. Date Range Buttons ─────────────────────────────────────
+    document.querySelectorAll('.date-range-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.date-range-btn').forEach(function (b) {
+                b.classList.remove('active', 'sn-btn-primary');
+                b.classList.add('sn-btn-outline');
+                b.setAttribute('aria-pressed', 'false');
+            });
+            btn.classList.add('active', 'sn-btn-primary');
+            btn.classList.remove('sn-btn-outline');
+            btn.setAttribute('aria-pressed', 'true');
+            const range = btn.dataset.range;
+            // BACKEND INTEGRATION: query backend with selected date range
+            SN.toast('Date range filter will query the backend (' + range + ' days).', 'info');
+        });
+    });
+
+    // ── 7. Refresh Button ─────────────────────────────────────────
+    const refreshBtn = document.getElementById('btn-refresh-dashboard');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+            // BACKEND INTEGRATION: re-fetch all dashboard data from API
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing…';
+            refreshBtn.disabled = true;
+            setTimeout(function () {
+                refreshBtn.innerHTML = '<i class="fas fa-rotate-right"></i> Refresh';
+                refreshBtn.disabled = false;
+                SN.toast('Dashboard data refreshed.', 'success');
+            }, 1200);
+        });
+    }
+
+    // ── 8. Update KPI cards from MOCK_DATA ───────────────────────
+    // BACKEND INTEGRATION: these values come from GET /api/analytics/summary
+    const s = MOCK_DATA.analytics.summary;
+    const el = function(id) { return document.getElementById(id); };
+    if (el('kpi-total'))    el('kpi-total').textContent    = s.total.toLocaleString();
+    if (el('kpi-open'))     el('kpi-open').textContent     = s.open.toLocaleString();
+    if (el('kpi-resolved')) el('kpi-resolved').textContent = s.resolved.toLocaleString();
+    if (el('kpi-escalated'))el('kpi-escalated').textContent= s.escalated.toLocaleString();
+    if (el('kpi-manual'))   el('kpi-manual').textContent   = s.manualReview.toLocaleString();
+    if (el('kpi-sla-risk')) el('kpi-sla-risk').textContent = s.slaRisk.toLocaleString();
+    if (el('kpi-mismatch')) el('kpi-mismatch').textContent = s.aiPythonMismatch.toLocaleString();
+
+    // AI comparison
+    const ai = MOCK_DATA.analytics.aiComparison;
+    if (el('ai-total-analyzed'))   el('ai-total-analyzed').textContent   = ai.totalAnalyzed.toLocaleString();
+    if (el('ai-fully-verified'))   el('ai-fully-verified').textContent   = ai.fullyVerified.toLocaleString();
+    if (el('ai-partial-match'))    el('ai-partial-match').textContent    = ai.partialMatch.toLocaleString();
+    if (el('ai-manual-review'))    el('ai-manual-review').textContent    = ai.manualReview.toLocaleString();
+    if (el('ai-verification-rate-pct')) el('ai-verification-rate-pct').textContent = ai.verificationRate + '%';
+    if (el('ai-verification-rate-big')) el('ai-verification-rate-big').textContent = ai.verificationRate + '%';
+    if (el('ai-verification-bar'))      el('ai-verification-bar').style.width = ai.verificationRate + '%';
+
+    // SLA status
+    const sla = MOCK_DATA.analytics.slaStatus;
+    if (el('sla-on-track')) el('sla-on-track').textContent = sla.onTrack.toLocaleString();
+    if (el('sla-at-risk'))  el('sla-at-risk').textContent  = sla.atRisk.toLocaleString();
+    if (el('sla-breached')) el('sla-breached').textContent = sla.breached.toLocaleString();
+});
+</script>
+{% endblock %}

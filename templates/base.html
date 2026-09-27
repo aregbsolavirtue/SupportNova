@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VoltCart - Power Your World{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        Fast delivery • Secure checkout • Reliable tech accessories
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Brand -->
+            <a href="/" class="nav-brand">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 28C10.8954 28 10 28.8954 10 30C10 31.1046 10.8954 32 12 32C13.1046 32 14 31.1046 14 30C14 28.8954 13.1046 28 12 28Z" fill="#9CA3AF"/>
+                    <path d="M28 28C26.8954 28 26 28.8954 26 30C26 31.1046 26.8954 32 28 32C29.1046 32 30 31.1046 30 30C30 28.8954 29.1046 28 28 28Z" fill="#9CA3AF"/>
+                    <path d="M6 10H10L13.2 22H27.8L31 10H14" stroke="#9CA3AF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 6L14 20H20L18 34L28 16H22L26 6H20Z" fill="#E8FF4D"/>
+                </svg>
+                <span>VoltCart</span>
+            </a>
+
+            <!-- Search (Desktop) -->
+            <div class="nav-search">
+                <form action="/shop.html" method="GET" id="nav-search-form">
+                    <input type="text" name="q" placeholder="Search products, categories..." aria-label="Search">
+                    <i class="fas fa-search search-icon"></i>
+                </form>
+            </div>
+
+            <!-- Links (Desktop & Mobile Nav) -->
+            <div class="nav-links" id="mobile-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/shop.html" class="nav-link">Shop</a>
+                <a href="/shop.html?category=Deals" class="nav-link">Deals</a>
+                <a href="/track-order.html" class="nav-link">Track Order</a>
+                <a href="/help-center.html" class="nav-link">Help Center</a>
+            </div>
+
+            <!-- Actions -->
+            <div class="nav-actions">
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="/account.html" class="btn-icon" aria-label="Account" style="color: white;">
+                    <i class="far fa-user"></i>
+                </a>
+                <button class="btn-icon cart-toggle" id="cart-toggle-btn" aria-label="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Drawer Overlay -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="btn-icon" id="cart-close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body" id="cart-items-container">
+            <!-- Cart items will be rendered here by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-subtotal">
+                <span>Subtotal</span>
+                <span id="cart-subtotal-price">$0</span>
+            </div>
+            <a href="/cart.html" class="btn btn-outline btn-block mb-sm">View Full Cart</a>
+            <a href="/checkout.html" class="btn btn-primary btn-block">Checkout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="nav-brand" style="margin-bottom: 1rem;">
+                        <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L14 20H20L18 34L28 16H22L26 6H20Z" fill="#E8FF4D"/>
+                        </svg>
+                        <span>VoltCart</span>
+                    </a>
+                    <p>Power your world. Charged-up electronics and premium accessories, delivered fast.</p>
+                </div>
+                <div>
+                    <h4>Shop</h4>
+                    <ul class="footer-links">
+                        <li><a href="/shop.html?category=Chargers">Chargers</a></li>
+                        <li><a href="/shop.html?category=Cables">Cables</a></li>
+                        <li><a href="/shop.html?category=Power">Power Banks</a></li>
+                        <li><a href="/shop.html?category=Audio">Audio</a></li>
+                        <li><a href="/shop.html?category=Mobile+Devices">Smartphones</a></li>
+                        <li><a href="/shop.html?category=Wearables">Wearables</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Customer Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="/help-center.html">Help Center</a></li>
+                        <li><a href="/track-order.html">Track Order</a></li>
+                        <li><a href="/help-center.html#returns">Returns & Refunds</a></li>
+                        <li><a href="/complaint.html">Submit a Complaint</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">About VoltCart</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; <span id="current-year"></span> VoltCart. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Data -->
+    <script src="/static/js/products.js"></script>
+    <!-- App Logic -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/cart.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

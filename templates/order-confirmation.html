@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed - VoltCart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmation-container {
+        max-width: 600px;
+        margin: var(--spacing-section) auto;
+        text-align: center;
+        background: var(--color-white);
+        padding: var(--spacing-section) var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    .success-icon {
+        font-size: 5rem;
+        color: var(--color-spark);
+        background: var(--color-navy);
+        width: 120px; height: 120px;
+        line-height: 120px;
+        border-radius: 50%;
+        margin: 0 auto var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--color-navy);
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-sm);
+        background: var(--color-cream);
+        border-radius: var(--radius-md);
+        display: inline-block;
+    }
+    .order-details {
+        text-align: left;
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="confirmation-container">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1>Order Confirmed!</h1>
+        <p class="text-muted" style="font-size: 1.125rem;">Thank you for shopping with VoltCart. We've received your order and are getting it ready to ship.</p>
+        
+        <div class="order-number" id="order-id">
+            Order #VC-000000
+        </div>
+        
+        <div class="order-details">
+            <h4 style="margin-bottom: var(--spacing-sm);">What happens next?</h4>
+            <p class="text-muted">You will receive an email confirmation shortly with your receipt and order details. You can track the status of your order using the link below.</p>
+        </div>
+        
+        <div class="flex flex-col gap-md mt-xl">
+            <a href="/track-order.html" class="btn btn-primary" id="track-btn">Track Order</a>
+            <a href="/shop.html" class="btn btn-outline">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order') || 'VC-' + Math.floor(Math.random() * 1000000);
+        
+        document.getElementById('order-id').textContent = `Order #${orderId}`;
+        
+        // Pass order ID to track page
+        const trackBtn = document.getElementById('track-btn');
+        trackBtn.href = `/track-order.html?order=${orderId}`;
+    });
+</script>
+{% endblock %}

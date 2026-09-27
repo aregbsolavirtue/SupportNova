@@ -1,0 +1,617 @@
+{% extends "supportnova_base.html" %}
+
+{% block title %}Agent Dashboard — SupportNova{% endblock %}
+
+{% block user_role %}Agent{% endblock %}
+
+{# ── Sidebar ─────────────────────────────────────────────────── #}
+{% block sidebar %}
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Overview</div>
+    <a href="/agent/dashboard" class="sn-nav-link active" aria-current="page">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/agent/complaints" class="sn-nav-link">
+        <i class="fas fa-inbox"></i> My Complaints
+        {# BACKEND INTEGRATION: replace badge count with {{ current_agent.assigned_count }} #}
+        <span class="sn-nav-badge" id="sidebar-assigned-count">24</span>
+    </a>
+    <a href="/agent/escalations" class="sn-nav-link">
+        <i class="fas fa-fire"></i> Escalations
+        <span class="sn-nav-badge" id="sidebar-escalated-count">3</span>
+    </a>
+    <a href="/agent/awaiting" class="sn-nav-link">
+        <i class="fas fa-hourglass-half"></i> Awaiting Customer
+        <span class="sn-nav-badge badge-warning" id="sidebar-awaiting-count">5</span>
+    </a>
+    <a href="/agent/manual-review" class="sn-nav-link">
+        <i class="fas fa-user-check"></i> Manual Review
+        <span class="sn-nav-badge badge-warning" id="sidebar-review-count">2</span>
+    </a>
+</div>
+
+<div class="sn-sidebar-divider"></div>
+
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Tools</div>
+    <a href="/agent/search" class="sn-nav-link">
+        <i class="fas fa-search"></i> Search Complaints
+    </a>
+    <a href="/agent/reports" class="sn-nav-link">
+        <i class="fas fa-chart-bar"></i> Reports
+    </a>
+</div>
+
+{# Escalation alert in sidebar #}
+<div class="sn-sidebar-section" id="sidebar-escalation-alert" style="margin-top: auto;">
+    <div style="
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: var(--sn-radius-md);
+        padding: var(--sn-sm) var(--sn-md);
+        font-size: 0.78rem;
+    ">
+        <div style="display:flex;align-items:center;gap:6px;color:var(--sn-danger);font-weight:700;margin-bottom:4px;">
+            <i class="fas fa-exclamation-circle"></i> Urgent Escalation
+        </div>
+        <p style="margin:0;color:#7f1d1d;font-size:0.75rem;line-height:1.4;">
+            <strong>SN-10482</strong> requires immediate attention
+        </p>
+        <a href="/agent/complaint?id=SN-10482" class="sn-btn sn-btn-danger sn-btn-sm sn-btn-block" style="margin-top:8px;font-size:0.72rem;">
+            <i class="fas fa-eye"></i> View Now
+        </a>
+    </div>
+</div>
+
+<div class="sn-sidebar-section" style="border-top: 1px solid var(--sn-border); padding-top: var(--sn-sm);">
+    {# BACKEND INTEGRATION: Link to host company URL from config.COMPANY_URL #}
+    <a href="/" class="sn-nav-link" style="font-size: 0.8rem;">
+        <i class="fas fa-arrow-left"></i> Return to VoltCart
+    </a>
+</div>
+{% endblock %}
+
+{# ── Main Content ──────────────────────────────────────────────── #}
+{% block content %}
+<div class="sn-fade-in">
+
+    {# ── Page Header ──────────────────────────────────────────── #}
+    <div class="sn-page-header">
+        <div>
+            {# BACKEND INTEGRATION: Replace greeting and agent name with {{ current_user.name }} #}
+            <h1 class="sn-page-title">
+                <i class="fas fa-tachometer-alt" style="color:var(--sn-accent);margin-right:8px;font-size:1.2rem;"></i>
+                Agent Dashboard
+            </h1>
+            {# BACKEND INTEGRATION: subtitle high-priority count from agent stats API #}
+            <p class="sn-page-subtitle" id="page-subtitle">
+                Good morning — you have <strong id="hp-count" style="color:var(--sn-danger);">7</strong> high-priority complaints
+            </p>
+        </div>
+        <div class="sn-page-actions">
+            <button class="sn-btn sn-btn-outline sn-btn-sm" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="/agent/complaints/new" class="sn-btn sn-btn-primary sn-btn-sm">
+                <i class="fas fa-plus"></i> New Complaint
+            </a>
+        </div>
+    </div>
+
+    {# ── KPI Stat Cards ─────────────────────────────────────── #}
+    {# BACKEND INTEGRATION: Populate from GET /api/agent/stats or {{ agent_stats }} context variable #}
+    <div class="sn-stats-grid" id="kpi-grid" role="region" aria-label="Key performance indicators">
+
+        <!-- Assigned to Me -->
+        <div class="sn-stat-card">
+            <div class="sn-stat-card-accent" style="background: var(--sn-accent);"></div>
+            <div class="sn-stat-icon" style="background: var(--sn-accent-light); color: var(--sn-accent);">
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <div class="sn-stat-label">Assigned to Me</div>
+            <div class="sn-stat-value" id="stat-assigned">24</div>
+            <div class="sn-stat-change neutral">
+                <i class="fas fa-minus"></i> active cases
+            </div>
+        </div>
+
+        <!-- High Priority -->
+        <div class="sn-stat-card">
+            <div class="sn-stat-card-accent" style="background: var(--sn-danger);"></div>
+            <div class="sn-stat-icon" style="background: var(--sn-danger-light); color: var(--sn-danger);">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="sn-stat-label">High Priority</div>
+            <div class="sn-stat-value" id="stat-high-priority" style="color: var(--sn-danger);">7</div>
+            <div class="sn-stat-change negative">
+                <i class="fas fa-exclamation-triangle"></i> requires action
+            </div>
+        </div>
+
+        <!-- Escalated -->
+        <div class="sn-stat-card">
+            <div class="sn-stat-card-accent" style="background: var(--sn-warning);"></div>
+            <div class="sn-stat-icon" style="background: var(--sn-warning-light); color: var(--sn-warning);">
+                <i class="fas fa-fire"></i>
+            </div>
+            <div class="sn-stat-label">Escalated</div>
+            <div class="sn-stat-value" id="stat-escalated" style="color: var(--sn-warning);">3</div>
+            <div class="sn-stat-change negative">
+                <i class="fas fa-arrow-up"></i> needs attention
+            </div>
+        </div>
+
+        <!-- Awaiting Customer -->
+        <div class="sn-stat-card">
+            <div class="sn-stat-card-accent" style="background: #64748B;"></div>
+            <div class="sn-stat-icon" style="background: rgba(100,116,139,0.12); color: #64748B;">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="sn-stat-label">Awaiting Customer</div>
+            <div class="sn-stat-value" id="stat-awaiting" style="color: #64748B;">5</div>
+            <div class="sn-stat-change neutral">
+                <i class="fas fa-clock"></i> pending response
+            </div>
+        </div>
+
+        <!-- Manual Review -->
+        <div class="sn-stat-card">
+            <div class="sn-stat-card-accent" style="background: var(--sn-ai-color);"></div>
+            <div class="sn-stat-icon" style="background: var(--sn-ai-light); color: var(--sn-ai-color);">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="sn-stat-label">Manual Review</div>
+            <div class="sn-stat-value" id="stat-review" style="color: var(--sn-ai-color);">2</div>
+            <div class="sn-stat-change negative">
+                <i class="fas fa-exclamation-circle"></i> AI/rule mismatch
+            </div>
+        </div>
+
+    </div>
+
+    {# ── My Assigned Complaints Table ─────────────────────────── #}
+    <div class="sn-card" style="margin-bottom: var(--sn-xl);">
+        <div class="sn-card-header">
+            <h2 class="sn-card-title">
+                <i class="fas fa-inbox" style="color:var(--sn-accent);"></i>
+                My Assigned Complaints
+            </h2>
+            <div style="display:flex;align-items:center;gap:var(--sn-sm);">
+                <span class="sn-badge sn-status-assigned" id="table-count-badge">24 complaints</span>
+                <a href="/agent/complaints" class="sn-btn sn-btn-outline sn-btn-sm">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        {# ── Filter Bar ─────────────────────────────────────── #}
+        <div style="padding: var(--sn-md) var(--sn-lg); border-bottom: 1px solid var(--sn-border);">
+            <div class="sn-filter-bar" style="margin-bottom:0;">
+                <div class="sn-search-input-wrap">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input
+                        type="search"
+                        class="sn-search-input"
+                        id="complaint-search"
+                        placeholder="Search by ID, customer name…"
+                        aria-label="Search complaints by ID or customer"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <label for="filter-priority" class="sr-only">Filter by Priority</label>
+                <select class="sn-filter-select" id="filter-priority" aria-label="Filter by priority">
+                    <option value="">All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <label for="filter-status" class="sr-only">Filter by Status</label>
+                <select class="sn-filter-select" id="filter-status" aria-label="Filter by status">
+                    <option value="">All Statuses</option>
+                    <option value="New">New</option>
+                    <option value="Analyzed">Analyzed</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Awaiting Customer">Awaiting Customer</option>
+                    <option value="Escalated">Escalated</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                    <option value="Reopened">Reopened</option>
+                </select>
+
+                <label for="filter-category" class="sr-only">Filter by Category</label>
+                <select class="sn-filter-select" id="filter-category" aria-label="Filter by category">
+                    <option value="">All Categories</option>
+                    <option value="Billing">Billing</option>
+                    <option value="Delivery">Delivery</option>
+                    <option value="Product Quality">Product Quality</option>
+                    <option value="Return &amp; Refund">Return &amp; Refund</option>
+                    <option value="Wrong Item">Wrong Item</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Payment">Payment</option>
+                    <option value="Shipping">Shipping</option>
+                </select>
+
+                <label for="filter-escalation" class="sr-only">Filter by Escalation</label>
+                <select class="sn-filter-select" id="filter-escalation" aria-label="Filter by escalation">
+                    <option value="">All</option>
+                    <option value="escalated">Escalated Only</option>
+                    <option value="not-escalated">Not Escalated</option>
+                </select>
+
+                <button class="sn-btn sn-btn-ghost sn-btn-sm" id="clear-filters" aria-label="Clear all filters">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        {# ── Table ──────────────────────────────────────────── #}
+        <div class="sn-table-wrap">
+            <table class="sn-table sn-table-responsive" role="grid" aria-label="My assigned complaints">
+                <thead>
+                    <tr>
+                        <th scope="col">Complaint ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Sentiment</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">AI Validation</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="complaints-tbody">
+                    {# BACKEND INTEGRATION: Rows rendered by JavaScript from MOCK_DATA.complaints
+                       In production, replace with server-rendered rows from {{ complaints | tojson }}
+                       or a real API call to GET /api/agent/complaints?assigned_to=me #}
+                    <tr>
+                        <td colspan="8" style="text-align:center;padding:2rem;color:var(--sn-text-muted);">
+                            <div class="sn-spinner" style="margin:0 auto var(--sn-sm);"></div>
+                            Loading complaints…
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {# Empty state (hidden by default; shown by JS when no results) #}
+        <div class="sn-empty-state" id="no-results" style="display:none;">
+            <div class="sn-empty-state-icon"><i class="fas fa-search"></i></div>
+            <h3>No complaints match your filters</h3>
+            <p>Try adjusting your search or filter criteria.</p>
+            <button class="sn-btn sn-btn-outline" onclick="clearAllFilters()">
+                <i class="fas fa-times"></i> Clear Filters
+            </button>
+        </div>
+
+        <div class="sn-card-footer" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sn-sm);">
+            <span class="sn-text-sm sn-text-muted" id="table-result-count">Showing all complaints</span>
+            {# BACKEND INTEGRATION: Pagination controls connect to GET /api/agent/complaints?page=N #}
+            <div class="sn-pagination" aria-label="Table pagination">
+                <button class="sn-page-btn" disabled aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
+                <button class="sn-page-btn active" aria-current="page" aria-label="Page 1">1</button>
+                <button class="sn-page-btn" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    {# ── Quick Stats Mini-Cards ─────────────────────────────── #}
+    <div class="sn-grid-3" style="margin-bottom: var(--sn-xl);" role="region" aria-label="Quick performance stats">
+
+        <!-- Resolved Today -->
+        <div class="sn-card" style="padding: var(--sn-lg); text-align:center;">
+            <div style="color: var(--sn-success); font-size: 2rem; font-weight: 800; line-height:1;" id="quick-resolved">6</div>
+            <div style="font-size: 0.75rem; color: var(--sn-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: var(--sn-xs);">
+                Resolved Today
+            </div>
+            <div style="margin-top: var(--sn-sm);">
+                <span class="sn-badge sn-badge-pass"><i class="fas fa-check-circle"></i> On Track</span>
+            </div>
+        </div>
+
+        <!-- Avg Response Time -->
+        <div class="sn-card" style="padding: var(--sn-lg); text-align:center;">
+            <div style="color: var(--sn-accent); font-size: 2rem; font-weight: 800; line-height:1;">2.4<span style="font-size:1rem;font-weight:600;">h</span></div>
+            <div style="font-size: 0.75rem; color: var(--sn-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: var(--sn-xs);">
+                Avg Response Time
+            </div>
+            <div style="margin-top: var(--sn-sm);">
+                <span class="sn-badge sn-badge-pass"><i class="fas fa-bolt"></i> Within SLA</span>
+            </div>
+        </div>
+
+        <!-- SLA On Track -->
+        <div class="sn-card" style="padding: var(--sn-lg); text-align:center;">
+            <div style="color: var(--sn-success); font-size: 2rem; font-weight: 800; line-height:1;">94<span style="font-size:1rem;font-weight:600;">%</span></div>
+            <div style="font-size: 0.75rem; color: var(--sn-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: var(--sn-xs);">
+                SLA On Track
+            </div>
+            <div style="margin-top: var(--sn-sm); background: var(--sn-surface-2); border-radius: var(--sn-radius-pill); height: 6px; overflow:hidden;">
+                <div style="width:94%;height:100%;background:var(--sn-success);border-radius:inherit;"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- /.sn-fade-in -->
+
+{# ── Respond Modal ─────────────────────────────────────────────── #}
+<div class="sn-modal-overlay" id="modal-internal-note" role="dialog" aria-modal="true" aria-labelledby="modal-note-title">
+    <div class="sn-modal">
+        <div class="sn-modal-header">
+            <h3 class="sn-modal-title" id="modal-note-title">
+                <i class="fas fa-sticky-note" style="color:var(--sn-accent);margin-right:6px;"></i>
+                Add Internal Note
+            </h3>
+            <button class="sn-btn-icon" data-sn-close="modal-internal-note" aria-label="Close modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sn-modal-body">
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="note-complaint-id">Complaint ID</label>
+                <input type="text" class="sn-form-control" id="note-complaint-id" readonly aria-readonly="true">
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="note-text">
+                    Note <span class="required" aria-label="required">*</span>
+                </label>
+                <textarea class="sn-form-control" id="note-text" rows="4"
+                    placeholder="Add an internal note visible only to agents…"
+                    required aria-required="true"></textarea>
+            </div>
+        </div>
+        <div class="sn-modal-footer">
+            <button class="sn-btn sn-btn-ghost" data-sn-close="modal-internal-note">Cancel</button>
+            <button class="sn-btn sn-btn-primary" id="submit-note">
+                <i class="fas fa-save"></i> Save Note
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{# ── Page-specific JavaScript ──────────────────────────────────── #}
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    // ── State ────────────────────────────────────────────────────
+    // BACKEND INTEGRATION: Replace MOCK_DATA.complaints with real API response.
+    // e.g., fetch('/api/agent/complaints?assigned_to=me').then(r => r.json())
+    let allComplaints = [];
+    let filteredComplaints = [];
+
+    // ── Boot ─────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        loadDashboardData();
+        bindFilterEvents();
+        bindModalEvents();
+    });
+
+    // ── Load data from mock ──────────────────────────────────────
+    function loadDashboardData() {
+        // BACKEND INTEGRATION: Replace with real API call.
+        allComplaints = (window.MOCK_DATA && MOCK_DATA.complaints) ? MOCK_DATA.complaints : [];
+        filteredComplaints = allComplaints.slice();
+
+        renderKPICards();
+        renderTable(filteredComplaints);
+        updateSidebarBadges();
+    }
+
+    // ── KPI Cards ────────────────────────────────────────────────
+    function renderKPICards() {
+        // BACKEND INTEGRATION: Replace with {{ agent_stats }} server variable or
+        // GET /api/agent/stats response.
+        const stats = (window.MOCK_DATA && MOCK_DATA.agentStats) ? MOCK_DATA.agentStats : {};
+
+        setEl('stat-assigned',      stats.assigned      || 0);
+        setEl('stat-high-priority', stats.highPriority  || 0);
+        setEl('stat-escalated',     stats.escalated     || 0);
+        setEl('stat-awaiting',      stats.awaitingCustomer || 0);
+        setEl('stat-review',        stats.manualReview  || 0);
+        setEl('quick-resolved',     stats.resolvedToday || 0);
+
+        // Update subtitle
+        const hpEl = document.getElementById('hp-count');
+        if (hpEl) hpEl.textContent = stats.highPriority || 0;
+
+        // Update sidebar badges
+        setEl('sidebar-assigned-count', stats.assigned || 0);
+        setEl('sidebar-escalated-count', stats.escalated || 0);
+        setEl('sidebar-awaiting-count', stats.awaitingCustomer || 0);
+        setEl('sidebar-review-count', stats.manualReview || 0);
+    }
+
+    // ── Render table rows ────────────────────────────────────────
+    function renderTable(complaints) {
+        const tbody = document.getElementById('complaints-tbody');
+        const noResults = document.getElementById('no-results');
+        const countBadge = document.getElementById('table-count-badge');
+        const resultCount = document.getElementById('table-result-count');
+
+        if (!tbody) return;
+
+        if (complaints.length === 0) {
+            tbody.innerHTML = '';
+            if (noResults) noResults.style.display = 'block';
+            if (countBadge) countBadge.textContent = '0 complaints';
+            if (resultCount) resultCount.textContent = 'No complaints found';
+            return;
+        }
+
+        if (noResults) noResults.style.display = 'none';
+        if (countBadge) countBadge.textContent = complaints.length + ' complaint' + (complaints.length !== 1 ? 's' : '');
+        if (resultCount) resultCount.textContent = 'Showing ' + complaints.length + ' of ' + allComplaints.length + ' complaints';
+
+        tbody.innerHTML = complaints.map(function (c) {
+            const escalatedStyle = c.escalationFlag
+                ? 'border-left: 3px solid var(--sn-danger);'
+                : '';
+
+            const escalatedIndicator = c.escalationFlag
+                ? '<span title="Escalated" aria-label="Escalated" style="color:var(--sn-danger);margin-left:4px;"><i class="fas fa-fire"></i></span>'
+                : '';
+
+            const validationBadge = (c.validation && c.validation.status)
+                ? SN.validationBadge(c.validation.status)
+                : '<span class="sn-badge sn-badge-warning"><i class="fas fa-question-circle"></i> —</span>';
+
+            return [
+                '<tr class="clickable" style="' + escalatedStyle + '" role="row"',
+                '    onclick="navigateToComplaint(\'' + escHtml(c.id) + '\')"',
+                '    data-id="' + escHtml(c.id) + '"',
+                '    data-priority="' + escHtml(c.priority) + '"',
+                '    data-status="' + escHtml(c.status) + '"',
+                '    data-category="' + escHtml(c.category) + '"',
+                '    data-escalation="' + (c.escalationFlag ? 'escalated' : 'not-escalated') + '">',
+                '  <td data-label="Complaint ID">',
+                '    <span class="sn-font-mono" style="color:var(--sn-accent);font-weight:700;">' + escHtml(c.id) + '</span>',
+                '    ' + escalatedIndicator,
+                '  </td>',
+                '  <td data-label="Customer">',
+                '    <div style="font-weight:600;color:var(--sn-text);">' + escHtml(c.customer.name) + '</div>',
+                '    <div style="font-size:0.75rem;color:var(--sn-text-muted);">' + escHtml(c.customer.email) + '</div>',
+                '  </td>',
+                '  <td data-label="Category">',
+                '    <span style="font-size:0.8rem;color:var(--sn-text-muted);">' + escHtml(c.category) + '</span>',
+                '  </td>',
+                '  <td data-label="Priority">' + SN.priorityBadge(c.priority) + '</td>',
+                '  <td data-label="Sentiment">' + SN.sentimentBadge(c.sentiment) + '</td>',
+                '  <td data-label="Status">' + SN.statusBadge(c.status) + '</td>',
+                '  <td data-label="AI Validation">' + validationBadge + '</td>',
+                '  <td data-label="Action">',
+                '    <a href="/agent/complaint?id=' + encodeURIComponent(c.id) + '"',
+                '       class="sn-btn sn-btn-outline sn-btn-sm"',
+                '       onclick="event.stopPropagation()"',
+                '       aria-label="View complaint ' + escHtml(c.id) + '">',
+                '      <i class="fas fa-eye"></i> View',
+                '    </a>',
+                '  </td>',
+                '</tr>',
+            ].join('\n');
+        }).join('\n');
+    }
+
+    // ── Navigate to complaint detail ─────────────────────────────
+    function navigateToComplaint(id) {
+        // BACKEND INTEGRATION: Replace with url_for('agent.complaint_detail', id=id)
+        window.location.href = '/agent/complaint?id=' + encodeURIComponent(id);
+    }
+    window.navigateToComplaint = navigateToComplaint;
+
+    // ── Filter / search logic ────────────────────────────────────
+    // BACKEND INTEGRATION: For large datasets, replace client-side filter with
+    // a debounced API call: GET /api/agent/complaints?q=...&priority=...&status=...
+    function applyFilters() {
+        const query     = (document.getElementById('complaint-search')  || {}).value || '';
+        const priority  = (document.getElementById('filter-priority')   || {}).value || '';
+        const status    = (document.getElementById('filter-status')     || {}).value || '';
+        const category  = (document.getElementById('filter-category')   || {}).value || '';
+        const escalation= (document.getElementById('filter-escalation') || {}).value || '';
+
+        filteredComplaints = allComplaints.filter(function (c) {
+            // Text search across ID and customer name/email
+            if (query) {
+                const q = query.toLowerCase();
+                const searchable = [
+                    c.id,
+                    c.customer.name,
+                    c.customer.email,
+                    c.customer.ref,
+                    c.title,
+                ].join(' ').toLowerCase();
+                if (!searchable.includes(q)) return false;
+            }
+            if (priority  && c.priority  !== priority)  return false;
+            if (status    && c.status    !== status)     return false;
+            if (category  && c.category  !== category)   return false;
+            if (escalation === 'escalated'     && !c.escalationFlag) return false;
+            if (escalation === 'not-escalated' &&  c.escalationFlag) return false;
+            return true;
+        });
+
+        renderTable(filteredComplaints);
+    }
+
+    function bindFilterEvents() {
+        ['complaint-search', 'filter-priority', 'filter-status', 'filter-category', 'filter-escalation']
+            .forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', applyFilters);
+            });
+
+        const clearBtn = document.getElementById('clear-filters');
+        if (clearBtn) clearBtn.addEventListener('click', clearAllFilters);
+    }
+
+    function clearAllFilters() {
+        ['complaint-search', 'filter-priority', 'filter-status', 'filter-category', 'filter-escalation']
+            .forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        applyFilters();
+    }
+    window.clearAllFilters = clearAllFilters;
+
+    // ── Modal events ─────────────────────────────────────────────
+    function bindModalEvents() {
+        const submitNote = document.getElementById('submit-note');
+        if (submitNote) {
+            submitNote.addEventListener('click', function () {
+                const noteText = document.getElementById('note-text');
+                if (!noteText || !noteText.value.trim()) {
+                    SN.toast('Please enter a note before saving.', 'warning');
+                    return;
+                }
+                // BACKEND INTEGRATION: POST /api/complaints/:id/notes
+                SN.toast('Internal note saved successfully.', 'success');
+                SN.closeModal('modal-internal-note');
+                if (noteText) noteText.value = '';
+            });
+        }
+    }
+
+    // ── Refresh dashboard ─────────────────────────────────────────
+    function refreshDashboard() {
+        // BACKEND INTEGRATION: Re-fetch stats and complaints from API
+        SN.toast('Dashboard refreshed.', 'info');
+        loadDashboardData();
+    }
+    window.refreshDashboard = refreshDashboard;
+
+    // ── Sidebar badge sync ────────────────────────────────────────
+    function updateSidebarBadges() {
+        const stats = (window.MOCK_DATA && MOCK_DATA.agentStats) ? MOCK_DATA.agentStats : {};
+        setEl('sidebar-assigned-count',  stats.assigned || 0);
+        setEl('sidebar-escalated-count', stats.escalated || 0);
+        setEl('sidebar-awaiting-count',  stats.awaitingCustomer || 0);
+        setEl('sidebar-review-count',    stats.manualReview || 0);
+    }
+
+    // ── Utilities ────────────────────────────────────────────────
+    function setEl(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+
+    function escHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+})();
+</script>
+{% endblock %}
