@@ -1,990 +1,1121 @@
-{% extends "supportnova_base.html" %}
-
-{% block title %}Submit a Complaint — SupportNova{% endblock %}
-
-{% block user_role %}Customer{% endblock %}
-
-{# ── Sidebar: Customer Navigation ──────────────────────────────── #}
-{% block sidebar %}
+{% extends "supportnova_base.html" %} {% block title %}Submit a Complaint —
+SupportNova{% endblock %} {% block user_role %}Customer{% endblock %} {# ──
+Sidebar: Customer Navigation ──────────────────────────────── #} {% block
+sidebar %}
 <div class="sn-sidebar-section">
-    <div class="sn-sidebar-label">Support Menu</div>
-    <a href="/support/" class="sn-nav-link">
-        <i class="fas fa-house" aria-hidden="true"></i> Help Center
-    </a>
-    <a href="/support/submit" class="sn-nav-link active" aria-current="page">
-        <i class="fas fa-pen-to-square" aria-hidden="true"></i> Submit a Complaint
-    </a>
-    <a href="/support/dashboard" class="sn-nav-link">
-        <i class="fas fa-list-check" aria-hidden="true"></i> My Complaints
-    </a>
-    <a href="/support/history" class="sn-nav-link">
-        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Complaint History
-    </a>
+  <div class="sn-sidebar-label">Support Menu</div>
+  <a href="/support/" class="sn-nav-link">
+    <i class="fas fa-house" aria-hidden="true"></i> Help Center
+  </a>
+  <a href="/support/submit" class="sn-nav-link active" aria-current="page">
+    <i class="fas fa-pen-to-square" aria-hidden="true"></i> Submit a Complaint
+  </a>
+  <a href="/support/dashboard" class="sn-nav-link">
+    <i class="fas fa-list-check" aria-hidden="true"></i> My Complaints
+  </a>
+  <a href="/support/history" class="sn-nav-link">
+    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Complaint
+    History
+  </a>
 </div>
 <div class="sn-sidebar-section">
-    <div class="sn-sidebar-label">Quick Actions</div>
-    <a href="/support/track" class="sn-nav-link">
-        <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Track a Complaint
-    </a>
+  <div class="sn-sidebar-label">Quick Actions</div>
+  <a href="/support/track" class="sn-nav-link">
+    <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Track a Complaint
+  </a>
 </div>
-{% endblock %}
-
-{% block extra_css %}
+{% endblock %} {% block extra_css %}
 <style>
-    /* ── Progress Steps ───────────────────────────────────────── */
-    .sn-progress-steps {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        margin-bottom: var(--sn-xl);
-        padding: var(--sn-md) 0;
-    }
-    .sn-prog-step {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--sn-xs);
-        flex: 1;
-        max-width: 160px;
-        position: relative;
-    }
-    .sn-prog-step::after {
-        content: '';
-        position: absolute;
-        top: 18px;
-        left: 60%;
-        right: -40%;
-        height: 2px;
-        background: var(--sn-border);
-        z-index: 0;
-    }
-    .sn-prog-step:last-child::after { display: none; }
-    .sn-prog-step.done::after { background: var(--sn-success); }
-    .sn-prog-step.active::after { background: var(--sn-border); }
-    .sn-prog-circle {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        font-weight: 700;
-        background: var(--sn-border);
-        color: var(--sn-text-light);
-        border: 2px solid var(--sn-surface);
-        z-index: 1;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-    .sn-prog-step.done .sn-prog-circle   { background: var(--sn-success); color: #fff; }
-    .sn-prog-step.active .sn-prog-circle { background: var(--sn-accent);  color: #fff; box-shadow: 0 0 0 5px var(--sn-accent-light); }
-    .sn-prog-label {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--sn-text-light);
-        text-align: center;
-        white-space: nowrap;
-    }
-    .sn-prog-step.active .sn-prog-label { color: var(--sn-accent); }
-    .sn-prog-step.done .sn-prog-label   { color: var(--sn-success); }
+  /* ── Progress Steps ───────────────────────────────────────── */
+  .sn-progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: var(--sn-xl);
+    padding: var(--sn-md) 0;
+  }
+  .sn-prog-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sn-xs);
+    flex: 1;
+    max-width: 160px;
+    position: relative;
+  }
+  .sn-prog-step::after {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 60%;
+    right: -40%;
+    height: 2px;
+    background: var(--sn-border);
+    z-index: 0;
+  }
+  .sn-prog-step:last-child::after {
+    display: none;
+  }
+  .sn-prog-step.done::after {
+    background: var(--sn-success);
+  }
+  .sn-prog-step.active::after {
+    background: var(--sn-border);
+  }
+  .sn-prog-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--sn-border);
+    color: var(--sn-text-light);
+    border: 2px solid var(--sn-surface);
+    z-index: 1;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .sn-prog-step.done .sn-prog-circle {
+    background: var(--sn-success);
+    color: #fff;
+  }
+  .sn-prog-step.active .sn-prog-circle {
+    background: var(--sn-accent);
+    color: #fff;
+    box-shadow: 0 0 0 5px var(--sn-accent-light);
+  }
+  .sn-prog-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--sn-text-light);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sn-prog-step.active .sn-prog-label {
+    color: var(--sn-accent);
+  }
+  .sn-prog-step.done .sn-prog-label {
+    color: var(--sn-success);
+  }
 
-    /* ── Form Card ────────────────────────────────────────────── */
+  /* ── Form Card ────────────────────────────────────────────── */
+  .sn-submit-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: var(--sn-xl);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
     .sn-submit-layout {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: var(--sn-xl);
-        align-items: start;
+      grid-template-columns: 1fr;
     }
-    @media (max-width: 900px) {
-        .sn-submit-layout { grid-template-columns: 1fr; }
-    }
+  }
 
-    /* ── Contact Method Radio ─────────────────────────────────── */
-    .sn-radio-group {
-        display: flex;
-        gap: var(--sn-sm);
-        flex-wrap: wrap;
-    }
-    .sn-radio-option {
-        flex: 1;
-        min-width: 100px;
-    }
-    .sn-radio-option input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0; height: 0;
-    }
-    .sn-radio-label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.75rem;
-        border: 1.5px solid var(--sn-border);
-        border-radius: var(--sn-radius-md);
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--sn-text-muted);
-        transition: all var(--sn-transition);
-        background: var(--sn-surface);
-        text-align: center;
-    }
-    .sn-radio-label i { font-size: 1.1rem; }
-    .sn-radio-option input[type="radio"]:checked + .sn-radio-label {
-        border-color: var(--sn-accent);
-        background: var(--sn-accent-light);
-        color: var(--sn-accent);
-    }
-    .sn-radio-option input[type="radio"]:focus-visible + .sn-radio-label {
-        box-shadow: 0 0 0 3px var(--sn-accent-light);
-    }
-    .sn-radio-label:hover {
-        border-color: var(--sn-accent);
-        color: var(--sn-accent);
-    }
+  /* ── Contact Method Radio ─────────────────────────────────── */
+  .sn-radio-group {
+    display: flex;
+    gap: var(--sn-sm);
+    flex-wrap: wrap;
+  }
+  .sn-radio-option {
+    flex: 1;
+    min-width: 100px;
+  }
+  .sn-radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .sn-radio-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem;
+    border: 1.5px solid var(--sn-border);
+    border-radius: var(--sn-radius-md);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sn-text-muted);
+    transition: all var(--sn-transition);
+    background: var(--sn-surface);
+    text-align: center;
+  }
+  .sn-radio-label i {
+    font-size: 1.1rem;
+  }
+  .sn-radio-option input[type="radio"]:checked + .sn-radio-label {
+    border-color: var(--sn-accent);
+    background: var(--sn-accent-light);
+    color: var(--sn-accent);
+  }
+  .sn-radio-option input[type="radio"]:focus-visible + .sn-radio-label {
+    box-shadow: 0 0 0 3px var(--sn-accent-light);
+  }
+  .sn-radio-label:hover {
+    border-color: var(--sn-accent);
+    color: var(--sn-accent);
+  }
 
-    /* ── File Drop Area ───────────────────────────────────────── */
-    .sn-file-drop {
-        border: 2px dashed var(--sn-border);
-        border-radius: var(--sn-radius-md);
-        padding: var(--sn-lg);
-        text-align: center;
-        cursor: pointer;
-        transition: all var(--sn-transition);
-        background: var(--sn-surface-2);
-        position: relative;
-    }
-    .sn-file-drop:hover, .sn-file-drop.drag-over {
-        border-color: var(--sn-accent);
-        background: var(--sn-accent-light);
-    }
-    .sn-file-drop input[type="file"] {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-    }
-    .sn-file-drop-icon { font-size: 1.5rem; color: var(--sn-text-light); margin-bottom: var(--sn-xs); }
-    .sn-file-drop-text { font-size: 0.8rem; color: var(--sn-text-muted); }
-    .sn-file-drop-text strong { color: var(--sn-accent); }
-    .sn-file-name {
-        margin-top: var(--sn-sm);
-        font-size: 0.78rem;
-        color: var(--sn-success);
-        font-weight: 600;
-        display: none;
-    }
+  /* ── File Drop Area ───────────────────────────────────────── */
+  .sn-file-drop {
+    border: 2px dashed var(--sn-border);
+    border-radius: var(--sn-radius-md);
+    padding: var(--sn-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--sn-transition);
+    background: var(--sn-surface-2);
+    position: relative;
+  }
+  .sn-file-drop:hover,
+  .sn-file-drop.drag-over {
+    border-color: var(--sn-accent);
+    background: var(--sn-accent-light);
+  }
+  .sn-file-drop input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .sn-file-drop-icon {
+    font-size: 1.5rem;
+    color: var(--sn-text-light);
+    margin-bottom: var(--sn-xs);
+  }
+  .sn-file-drop-text {
+    font-size: 0.8rem;
+    color: var(--sn-text-muted);
+  }
+  .sn-file-drop-text strong {
+    color: var(--sn-accent);
+  }
+  .sn-file-name {
+    margin-top: var(--sn-sm);
+    font-size: 0.78rem;
+    color: var(--sn-success);
+    font-weight: 600;
+    display: none;
+  }
 
-    /* ── Analysis Callout Box ─────────────────────────────────── */
-    .sn-analysis-callout {
-        background: linear-gradient(135deg, rgba(79,127,255,0.06) 0%, var(--sn-surface) 100%);
-        border: 1.5px solid rgba(79,127,255,0.2);
-        border-radius: var(--sn-radius-lg);
-        padding: var(--sn-lg);
-    }
-    .sn-analysis-callout-header {
-        display: flex;
-        align-items: center;
-        gap: var(--sn-sm);
-        margin-bottom: var(--sn-sm);
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: var(--sn-accent);
-    }
-    .sn-analysis-callout p {
-        font-size: 0.8rem;
-        color: var(--sn-text-muted);
-        margin: 0;
-        line-height: 1.6;
-    }
+  /* ── Analysis Callout Box ─────────────────────────────────── */
+  .sn-analysis-callout {
+    background: linear-gradient(
+      135deg,
+      rgba(79, 127, 255, 0.06) 0%,
+      var(--sn-surface) 100%
+    );
+    border: 1.5px solid rgba(79, 127, 255, 0.2);
+    border-radius: var(--sn-radius-lg);
+    padding: var(--sn-lg);
+  }
+  .sn-analysis-callout-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sn-sm);
+    margin-bottom: var(--sn-sm);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--sn-accent);
+  }
+  .sn-analysis-callout p {
+    font-size: 0.8rem;
+    color: var(--sn-text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
 
-    /* ── Sidebar info cards ───────────────────────────────────── */
-    .sn-info-card {
-        background: var(--sn-surface);
-        border: 1px solid var(--sn-border);
-        border-radius: var(--sn-radius-lg);
-        padding: var(--sn-md);
-        margin-bottom: var(--sn-md);
-    }
-    .sn-info-card h3 {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--sn-primary);
-        margin: 0 0 var(--sn-sm);
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .sn-info-card ul {
-        list-style: none;
-        padding: 0; margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--sn-xs);
-    }
-    .sn-info-card ul li {
-        font-size: 0.78rem;
-        color: var(--sn-text-muted);
-        display: flex;
-        align-items: flex-start;
-        gap: 0.4rem;
-        line-height: 1.5;
-    }
-    .sn-info-card ul li i { color: var(--sn-success); margin-top: 2px; flex-shrink: 0; }
+  /* ── Sidebar info cards ───────────────────────────────────── */
+  .sn-info-card {
+    background: var(--sn-surface);
+    border: 1px solid var(--sn-border);
+    border-radius: var(--sn-radius-lg);
+    padding: var(--sn-md);
+    margin-bottom: var(--sn-md);
+  }
+  .sn-info-card h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .sn-info-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sn-xs);
+  }
+  .sn-info-card ul li {
+    font-size: 0.78rem;
+    color: var(--sn-text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    line-height: 1.5;
+  }
+  .sn-info-card ul li i {
+    color: var(--sn-success);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
 
-    /* ── Animated Analysis State ──────────────────────────────── */
-    #sn-analysis-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(17,24,39,0.55);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
+  /* ── Animated Analysis State ──────────────────────────────── */
+  #sn-analysis-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  #sn-analysis-overlay.show {
+    display: flex;
+  }
+  .sn-analysis-modal {
+    background: var(--sn-surface);
+    border-radius: var(--sn-radius-xl);
+    padding: var(--sn-xxl) var(--sn-xl);
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    box-shadow: var(--sn-shadow-lg);
+  }
+  .sn-analysis-spinner {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sn-accent-light);
+    margin: 0 auto var(--sn-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: var(--sn-accent);
+    animation: spin-slow 2s linear infinite;
+  }
+  @keyframes spin-slow {
+    0% {
+      transform: rotate(0deg);
     }
-    #sn-analysis-overlay.show { display: flex; }
-    .sn-analysis-modal {
-        background: var(--sn-surface);
-        border-radius: var(--sn-radius-xl);
-        padding: var(--sn-xxl) var(--sn-xl);
-        max-width: 480px;
-        width: 90%;
-        text-align: center;
-        box-shadow: var(--sn-shadow-lg);
+    100% {
+      transform: rotate(360deg);
     }
-    .sn-analysis-spinner {
-        width: 64px; height: 64px;
-        border-radius: 50%;
-        background: var(--sn-accent-light);
-        margin: 0 auto var(--sn-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        color: var(--sn-accent);
-        animation: spin-slow 2s linear infinite;
-    }
-    @keyframes spin-slow {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    .sn-analysis-modal h2 {
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: var(--sn-primary);
-        margin: 0 0 var(--sn-xs);
-    }
-    .sn-analysis-modal p {
-        font-size: 0.875rem;
-        color: var(--sn-text-muted);
-        margin: 0 0 var(--sn-xl);
-    }
-    .sn-analysis-steps {
-        list-style: none;
-        padding: 0; margin: 0 0 var(--sn-xl);
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-        gap: var(--sn-sm);
-    }
-    .sn-analysis-step {
-        display: flex;
-        align-items: center;
-        gap: var(--sn-sm);
-        padding: 0.6rem var(--sn-md);
-        border-radius: var(--sn-radius-md);
-        font-size: 0.85rem;
-        color: var(--sn-text-muted);
-        background: var(--sn-surface-2);
-        border: 1px solid var(--sn-border-light);
-        transition: all 0.4s ease;
-    }
-    .sn-analysis-step.step-active {
-        background: var(--sn-accent-light);
-        color: var(--sn-accent);
-        border-color: rgba(79,127,255,0.3);
-        font-weight: 600;
-    }
-    .sn-analysis-step.step-done {
-        background: var(--sn-success-light);
-        color: var(--sn-success);
-        border-color: rgba(16,185,129,0.25);
-        font-weight: 600;
-    }
-    .sn-analysis-step-icon { width: 22px; text-align: center; flex-shrink: 0; }
+  }
+  .sn-analysis-modal h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-xs);
+  }
+  .sn-analysis-modal p {
+    font-size: 0.875rem;
+    color: var(--sn-text-muted);
+    margin: 0 0 var(--sn-xl);
+  }
+  .sn-analysis-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sn-xl);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sn-sm);
+  }
+  .sn-analysis-step {
+    display: flex;
+    align-items: center;
+    gap: var(--sn-sm);
+    padding: 0.6rem var(--sn-md);
+    border-radius: var(--sn-radius-md);
+    font-size: 0.85rem;
+    color: var(--sn-text-muted);
+    background: var(--sn-surface-2);
+    border: 1px solid var(--sn-border-light);
+    transition: all 0.4s ease;
+  }
+  .sn-analysis-step.step-active {
+    background: var(--sn-accent-light);
+    color: var(--sn-accent);
+    border-color: rgba(79, 127, 255, 0.3);
+    font-weight: 600;
+  }
+  .sn-analysis-step.step-done {
+    background: var(--sn-success-light);
+    color: var(--sn-success);
+    border-color: rgba(16, 185, 129, 0.25);
+    font-weight: 600;
+  }
+  .sn-analysis-step-icon {
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
 
-    /* ── Success State ────────────────────────────────────────── */
-    #sn-success-state {
-        display: none;
-        text-align: center;
-        padding: var(--sn-xxl) var(--sn-xl);
+  /* ── Success State ────────────────────────────────────────── */
+  #sn-success-state {
+    display: none;
+    text-align: center;
+    padding: var(--sn-xxl) var(--sn-xl);
+  }
+  .sn-success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--sn-success-light);
+    color: var(--sn-success);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--sn-lg);
+    animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop-in {
+    0% {
+      transform: scale(0);
+      opacity: 0;
     }
-    .sn-success-icon {
-        width: 80px; height: 80px;
-        border-radius: 50%;
-        background: var(--sn-success-light);
-        color: var(--sn-success);
-        font-size: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--sn-lg);
-        animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    100% {
+      transform: scale(1);
+      opacity: 1;
     }
-    @keyframes pop-in {
-        0% { transform: scale(0); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    #sn-success-state h2 {
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: var(--sn-primary);
-        margin: 0 0 var(--sn-xs);
-    }
-    #sn-success-state p {
-        font-size: 0.875rem;
-        color: var(--sn-text-muted);
-        margin: 0 0 var(--sn-sm);
-    }
-    .sn-complaint-id-badge {
-        display: inline-block;
-        background: var(--sn-primary);
-        color: #fff;
-        font-size: 1.1rem;
-        font-weight: 800;
-        letter-spacing: 1px;
-        padding: 0.5rem 1.5rem;
-        border-radius: var(--sn-radius-pill);
-        margin: var(--sn-md) 0 var(--sn-xl);
-    }
-    .sn-success-actions {
-        display: flex;
-        gap: var(--sn-sm);
-        justify-content: center;
-        flex-wrap: wrap;
-    }
+  }
+  #sn-success-state h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-xs);
+  }
+  #sn-success-state p {
+    font-size: 0.875rem;
+    color: var(--sn-text-muted);
+    margin: 0 0 var(--sn-sm);
+  }
+  .sn-complaint-id-badge {
+    display: inline-block;
+    background: var(--sn-primary);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--sn-radius-pill);
+    margin: var(--sn-md) 0 var(--sn-xl);
+  }
+  .sn-success-actions {
+    display: flex;
+    gap: var(--sn-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 </style>
-{% endblock %}
-
-{% block content %}
-
-{# ── Page Header ────────────────────────────────────────────────── #}
+{% endblock %} {% block content %} {# ── Page Header
+────────────────────────────────────────────────── #}
 <div class="sn-page-header">
-    <div>
-        <h1 class="sn-page-title">Submit a Complaint</h1>
-        <p class="sn-page-subtitle">Tell us what happened and we'll make it right.</p>
-    </div>
+  <div>
+    <h1 class="sn-page-title">Submit a Complaint</h1>
+    <p class="sn-page-subtitle">
+      Tell us what happened and we'll make it right.
+    </p>
+  </div>
 </div>
 
 {# ── Progress Indicator ─────────────────────────────────────────── #}
-<nav aria-label="Submission progress" style="margin-bottom: var(--sn-xl);">
-    <div class="sn-progress-steps">
-        <div class="sn-prog-step active" id="prog-step-1" aria-current="step">
-            <div class="sn-prog-circle"><i class="fas fa-pen" aria-hidden="true"></i></div>
-            <span class="sn-prog-label">Describe</span>
-        </div>
-        <div class="sn-prog-step" id="prog-step-2">
-            <div class="sn-prog-circle">2</div>
-            <span class="sn-prog-label">Submit</span>
-        </div>
-        <div class="sn-prog-step" id="prog-step-3">
-            <div class="sn-prog-circle">3</div>
-            <span class="sn-prog-label">Track</span>
-        </div>
+<nav aria-label="Submission progress" style="margin-bottom: var(--sn-xl)">
+  <div class="sn-progress-steps">
+    <div class="sn-prog-step active" id="prog-step-1" aria-current="step">
+      <div class="sn-prog-circle">
+        <i class="fas fa-pen" aria-hidden="true"></i>
+      </div>
+      <span class="sn-prog-label">Describe</span>
     </div>
+    <div class="sn-prog-step" id="prog-step-2">
+      <div class="sn-prog-circle">2</div>
+      <span class="sn-prog-label">Submit</span>
+    </div>
+    <div class="sn-prog-step" id="prog-step-3">
+      <div class="sn-prog-circle">3</div>
+      <span class="sn-prog-label">Track</span>
+    </div>
+  </div>
 </nav>
 
 {# ── Two-column Layout ──────────────────────────────────────────── #}
 <div class="sn-submit-layout">
-
-    {# ── Left: Main Form ──────────────────────────────────────── #}
-    <div>
-
-        {# Form itself — shown during step 1 #}
-        <div id="sn-form-container">
-            {#
-                BACKEND INTEGRATION:
-                On real form submission, POST to /support/submit with CSRF token.
-                The action and method below are for demo only — JS intercepts submit.
-                Replace action="/support/submit" when backend routes are active.
-            #}
-            <form id="sn-complaint-form" novalidate aria-label="Complaint submission form">
-
-                {# ── Personal Details ─────────────────────────── #}
-                <div class="sn-card" style="margin-bottom: var(--sn-md);">
-                    <div class="sn-card-header">
-                        <h2 class="sn-card-title">
-                            <i class="fas fa-user" aria-hidden="true"></i>
-                            Your Details
-                        </h2>
-                    </div>
-                    <div class="sn-card-body">
-                        <div class="sn-form-row">
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="full-name">
-                                    Full Name <span class="required" aria-label="required">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="full-name"
-                                    name="full_name"
-                                    class="sn-form-control"
-                                    required
-                                    placeholder="e.g. Jane Smith"
-                                    autocomplete="name"
-                                    aria-required="true"
-                                >
-                                <div class="sn-form-error" id="err-full-name" role="alert" aria-live="polite" style="display:none;"></div>
-                            </div>
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="email">
-                                    Email Address <span class="required" aria-label="required">*</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    class="sn-form-control"
-                                    required
-                                    placeholder="you@example.com"
-                                    autocomplete="email"
-                                    aria-required="true"
-                                >
-                                <div class="sn-form-error" id="err-email" role="alert" aria-live="polite" style="display:none;"></div>
-                            </div>
-                        </div>
-                        <div class="sn-form-row">
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="phone">
-                                    Phone Number
-                                    <span style="font-weight:400;color:var(--sn-text-muted);font-size:0.78rem;">(optional)</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    class="sn-form-control"
-                                    placeholder="+44 7700 900000"
-                                    autocomplete="tel"
-                                >
-                            </div>
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="order-ref">
-                                    Order / Reference Number
-                                    <span style="font-weight:400;color:var(--sn-text-muted);font-size:0.78rem;">(optional)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="order-ref"
-                                    name="order_ref"
-                                    class="sn-form-control"
-                                    placeholder="VC-123456"
-                                    autocomplete="off"
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# ── Complaint Details ─────────────────────────── #}
-                <div class="sn-card" style="margin-bottom: var(--sn-md);">
-                    <div class="sn-card-header">
-                        <h2 class="sn-card-title">
-                            <i class="fas fa-comment-dots" aria-hidden="true"></i>
-                            What Happened?
-                        </h2>
-                    </div>
-                    <div class="sn-card-body">
-                        <div class="sn-form-group">
-                            <label class="sn-form-label" for="description">
-                                Describe your issue <span class="required" aria-label="required">*</span>
-                            </label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                class="sn-form-control"
-                                rows="6"
-                                required
-                                aria-required="true"
-                                placeholder="Please describe your issue in detail — what happened, when it happened, and how it's affecting you…"
-                                aria-describedby="desc-hint"
-                            ></textarea>
-                            <div class="sn-form-hint" id="desc-hint">
-                                <i class="fas fa-lightbulb" style="color:var(--sn-warning);" aria-hidden="true"></i>
-                                The more detail you provide, the faster we can help.
-                            </div>
-                            <div class="sn-form-error" id="err-description" role="alert" aria-live="polite" style="display:none;"></div>
-                        </div>
-
-                        <div class="sn-form-row">
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="category">
-                                    Category <span class="required" aria-label="required">*</span>
-                                </label>
-                                <select id="category" name="category" class="sn-form-control" required aria-required="true">
-                                    <option value="" disabled selected>Select the type of issue…</option>
-                                    <option value="Orders &amp; Delivery">Orders &amp; Delivery</option>
-                                    <option value="Payments &amp; Billing">Payments &amp; Billing</option>
-                                    <option value="Returns &amp; Refunds">Returns &amp; Refunds</option>
-                                    <option value="Product Issues">Product Issues</option>
-                                    <option value="Account &amp; Access">Account &amp; Access</option>
-                                    <option value="Technical Issues">Technical Issues</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                <div class="sn-form-error" id="err-category" role="alert" aria-live="polite" style="display:none;"></div>
-                            </div>
-                            <div class="sn-form-group">
-                                <label class="sn-form-label" for="product">
-                                    Product Involved
-                                    <span style="font-weight:400;color:var(--sn-text-muted);font-size:0.78rem;">(optional)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="product"
-                                    name="product"
-                                    class="sn-form-control"
-                                    placeholder="e.g. USB-C Fast Charger 65W"
-                                    autocomplete="off"
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# ── Preferences & Attachment ──────────────────── #}
-                <div class="sn-card" style="margin-bottom: var(--sn-lg);">
-                    <div class="sn-card-header">
-                        <h2 class="sn-card-title">
-                            <i class="fas fa-sliders" aria-hidden="true"></i>
-                            Preferences &amp; Attachments
-                        </h2>
-                    </div>
-                    <div class="sn-card-body">
-                        {# Preferred contact method #}
-                        <div class="sn-form-group">
-                            <fieldset style="border:none;padding:0;margin:0;">
-                                <legend class="sn-form-label">
-                                    How would you like us to contact you?
-                                </legend>
-                                <div class="sn-radio-group" role="group">
-                                    <div class="sn-radio-option">
-                                        <input type="radio" name="contact_method" id="contact-email" value="Email" checked>
-                                        <label class="sn-radio-label" for="contact-email">
-                                            <i class="fas fa-envelope" aria-hidden="true"></i>
-                                            Email
-                                        </label>
-                                    </div>
-                                    <div class="sn-radio-option">
-                                        <input type="radio" name="contact_method" id="contact-phone" value="Phone">
-                                        <label class="sn-radio-label" for="contact-phone">
-                                            <i class="fas fa-phone" aria-hidden="true"></i>
-                                            Phone
-                                        </label>
-                                    </div>
-                                    <div class="sn-radio-option">
-                                        <input type="radio" name="contact_method" id="contact-either" value="Either">
-                                        <label class="sn-radio-label" for="contact-either">
-                                            <i class="fas fa-circle-check" aria-hidden="true"></i>
-                                            Either
-                                        </label>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </div>
-
-                        {# File attachment #}
-                        <div class="sn-form-group">
-                            <label class="sn-form-label" for="attachment">
-                                Attach a File
-                                <span style="font-weight:400;color:var(--sn-text-muted);font-size:0.78rem;">(optional — images or PDF)</span>
-                            </label>
-                            <div class="sn-file-drop" id="file-drop-zone">
-                                <input
-                                    type="file"
-                                    id="attachment"
-                                    name="attachment"
-                                    accept="image/*,.pdf"
-                                    aria-describedby="attachment-hint"
-                                >
-                                <div class="sn-file-drop-icon"><i class="fas fa-cloud-arrow-up" aria-hidden="true"></i></div>
-                                <div class="sn-file-drop-text">
-                                    <strong>Click to upload</strong> or drag and drop a file here
-                                </div>
-                                <div class="sn-file-name" id="file-name-display" aria-live="polite"></div>
-                            </div>
-                            <div class="sn-form-hint" id="attachment-hint">Accepted formats: JPG, PNG, GIF, PDF. Max 10MB.</div>
-                        </div>
-
-                        {# Analysis callout #}
-                        <div class="sn-analysis-callout" role="note" aria-label="What happens after submission">
-                            <div class="sn-analysis-callout-header">
-                                <i class="fas fa-circle-info" aria-hidden="true"></i>
-                                What happens next?
-                            </div>
-                            <p>Once submitted, your complaint will be carefully reviewed, the relevant policies will be identified, and it will be sent to the right support team — usually within minutes.</p>
-                        </div>
-                    </div>
-                </div>
-
-                {# ── Submit Button ─────────────────────────────── #}
-                <button type="submit" class="sn-btn sn-btn-primary sn-btn-lg sn-btn-block" id="submit-btn">
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                    Submit Complaint
-                </button>
-
-            </form>
-        </div>
-
-        {# ── Success State (shown after submission) ────────────── #}
-        <div id="sn-success-state" role="status" aria-live="polite" aria-label="Submission preview">
-            <div class="sn-card">
-                <div class="sn-card-body" style="padding: var(--sn-xxl) var(--sn-xl);">
-                    <div class="sn-success-icon" aria-hidden="true">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <h2>Submission preview</h2>
-                    <p>This demo has no complaint submission service connected, so your message has not been sent or saved.</p>
-                    <p style="margin-top:var(--sn-xs);">Demo reference (not a live complaint):</p>
-                    <div class="sn-complaint-id-badge" id="generated-complaint-id" aria-label="Complaint reference number">—</div>
-                    <p style="font-size:0.8rem;color:var(--sn-text-muted);margin-bottom:var(--sn-xl);">
-                        Save this reference — you can use it to track your complaint at any time.
-                    </p>
-                    <div class="sn-success-actions">
-                        <a href="#" class="sn-btn sn-btn-primary" id="view-complaint-btn">
-                            <i class="fas fa-eye" aria-hidden="true"></i>
-                            View demo complaints
-                        </a>
-                        <button type="button" class="sn-btn sn-btn-outline" id="submit-another-btn">
-                            <i class="fas fa-plus" aria-hidden="true"></i>
-                            Submit Another
-                        </button>
-                    </div>
-                </div>
+  {# ── Left: Main Form ──────────────────────────────────────── #}
+  <div>
+    {# Form itself — shown during step 1 #}
+    <div id="sn-form-container">
+      {# BACKEND INTEGRATION: On real form submission, POST to /support/submit
+      with CSRF token. The action and method below are for demo only — JS
+      intercepts submit. Replace action="/support/submit" when backend routes
+      are active. #}
+      <form
+        id="sn-complaint-form"
+        novalidate
+        aria-label="Complaint submission form"
+      >
+        {# ── Personal Details ─────────────────────────── #}
+        <div class="sn-card" style="margin-bottom: var(--sn-md)">
+          <div class="sn-card-header">
+            <h2 class="sn-card-title">
+              <i class="fas fa-user" aria-hidden="true"></i>
+              Your Details
+            </h2>
+          </div>
+          <div class="sn-card-body">
+            <div class="sn-form-row">
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="full-name">
+                  Full Name
+                  <span class="required" aria-label="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="full-name"
+                  name="full_name"
+                  class="sn-form-control"
+                  required
+                  placeholder="e.g. Jane Smith"
+                  autocomplete="name"
+                  aria-required="true"
+                />
+                <div
+                  class="sn-form-error"
+                  id="err-full-name"
+                  role="alert"
+                  aria-live="polite"
+                  style="display: none"
+                ></div>
+              </div>
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="email">
+                  Email Address
+                  <span class="required" aria-label="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="sn-form-control"
+                  required
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                  aria-required="true"
+                />
+                <div
+                  class="sn-form-error"
+                  id="err-email"
+                  role="alert"
+                  aria-live="polite"
+                  style="display: none"
+                ></div>
+              </div>
             </div>
+            <div class="sn-form-row">
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="phone">
+                  Phone Number
+                  <span
+                    style="
+                      font-weight: 400;
+                      color: var(--sn-text-muted);
+                      font-size: 0.78rem;
+                    "
+                    >(optional)</span
+                  >
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="sn-form-control"
+                  placeholder="+44 7700 900000"
+                  autocomplete="tel"
+                />
+              </div>
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="order-ref">
+                  Order / Reference Number
+                  <span
+                    style="
+                      font-weight: 400;
+                      color: var(--sn-text-muted);
+                      font-size: 0.78rem;
+                    "
+                    >(optional)</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  id="order-ref"
+                  name="order_ref"
+                  class="sn-form-control"
+                  placeholder="VC-123456"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
+        {# ── Complaint Details ─────────────────────────── #}
+        <div class="sn-card" style="margin-bottom: var(--sn-md)">
+          <div class="sn-card-header">
+            <h2 class="sn-card-title">
+              <i class="fas fa-comment-dots" aria-hidden="true"></i>
+              What Happened?
+            </h2>
+          </div>
+          <div class="sn-card-body">
+            <div class="sn-form-group">
+              <label class="sn-form-label" for="description">
+                Describe your issue
+                <span class="required" aria-label="required">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                class="sn-form-control"
+                rows="6"
+                required
+                aria-required="true"
+                placeholder="Please describe your issue in detail — what happened, when it happened, and how it's affecting you…"
+                aria-describedby="desc-hint"
+              ></textarea>
+              <div class="sn-form-hint" id="desc-hint">
+                <i
+                  class="fas fa-lightbulb"
+                  style="color: var(--sn-warning)"
+                  aria-hidden="true"
+                ></i>
+                The more detail you provide, the faster we can help.
+              </div>
+              <div
+                class="sn-form-error"
+                id="err-description"
+                role="alert"
+                aria-live="polite"
+                style="display: none"
+              ></div>
+            </div>
+
+            <div class="sn-form-row">
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="category">
+                  Category <span class="required" aria-label="required">*</span>
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  class="sn-form-control"
+                  required
+                  aria-required="true"
+                >
+                  <option value="" disabled selected>
+                    Select the type of issue…
+                  </option>
+                  <option value="Orders &amp; Delivery">
+                    Orders &amp; Delivery
+                  </option>
+                  <option value="Payments &amp; Billing">
+                    Payments &amp; Billing
+                  </option>
+                  <option value="Returns &amp; Refunds">
+                    Returns &amp; Refunds
+                  </option>
+                  <option value="Product Issues">Product Issues</option>
+                  <option value="Account &amp; Access">
+                    Account &amp; Access
+                  </option>
+                  <option value="Technical Issues">Technical Issues</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div
+                  class="sn-form-error"
+                  id="err-category"
+                  role="alert"
+                  aria-live="polite"
+                  style="display: none"
+                ></div>
+              </div>
+              <div class="sn-form-group">
+                <label class="sn-form-label" for="product">
+                  Product Involved
+                  <span
+                    style="
+                      font-weight: 400;
+                      color: var(--sn-text-muted);
+                      font-size: 0.78rem;
+                    "
+                    >(optional)</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  id="product"
+                  name="product"
+                  class="sn-form-control"
+                  placeholder="e.g. USB-C Fast Charger 65W"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ── Preferences & Attachment ──────────────────── #}
+        <div class="sn-card" style="margin-bottom: var(--sn-lg)">
+          <div class="sn-card-header">
+            <h2 class="sn-card-title">
+              <i class="fas fa-sliders" aria-hidden="true"></i>
+              Preferences &amp; Attachments
+            </h2>
+          </div>
+          <div class="sn-card-body">
+            {# Preferred contact method #}
+            <div class="sn-form-group">
+              <fieldset style="border: none; padding: 0; margin: 0">
+                <legend class="sn-form-label">
+                  How would you like us to contact you?
+                </legend>
+                <div class="sn-radio-group" role="group">
+                  <div class="sn-radio-option">
+                    <input
+                      type="radio"
+                      name="contact_method"
+                      id="contact-email"
+                      value="Email"
+                      checked
+                    />
+                    <label class="sn-radio-label" for="contact-email">
+                      <i class="fas fa-envelope" aria-hidden="true"></i>
+                      Email
+                    </label>
+                  </div>
+                  <div class="sn-radio-option">
+                    <input
+                      type="radio"
+                      name="contact_method"
+                      id="contact-phone"
+                      value="Phone"
+                    />
+                    <label class="sn-radio-label" for="contact-phone">
+                      <i class="fas fa-phone" aria-hidden="true"></i>
+                      Phone
+                    </label>
+                  </div>
+                  <div class="sn-radio-option">
+                    <input
+                      type="radio"
+                      name="contact_method"
+                      id="contact-either"
+                      value="Either"
+                    />
+                    <label class="sn-radio-label" for="contact-either">
+                      <i class="fas fa-circle-check" aria-hidden="true"></i>
+                      Either
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+
+            {# File attachment #}
+            <div class="sn-form-group">
+              <label class="sn-form-label" for="attachment">
+                Attach a File
+                <span
+                  style="
+                    font-weight: 400;
+                    color: var(--sn-text-muted);
+                    font-size: 0.78rem;
+                  "
+                  >(optional — images or PDF)</span
+                >
+              </label>
+              <div class="sn-file-drop" id="file-drop-zone">
+                <input
+                  type="file"
+                  id="attachment"
+                  name="attachment"
+                  accept="image/*,.pdf"
+                  aria-describedby="attachment-hint"
+                />
+                <div class="sn-file-drop-icon">
+                  <i class="fas fa-cloud-arrow-up" aria-hidden="true"></i>
+                </div>
+                <div class="sn-file-drop-text">
+                  <strong>Click to upload</strong> or drag and drop a file here
+                </div>
+                <div
+                  class="sn-file-name"
+                  id="file-name-display"
+                  aria-live="polite"
+                ></div>
+              </div>
+              <div class="sn-form-hint" id="attachment-hint">
+                Accepted formats: JPG, PNG, GIF, PDF. Max 10MB.
+              </div>
+            </div>
+
+            {# Analysis callout #}
+            <div
+              class="sn-analysis-callout"
+              role="note"
+              aria-label="What happens after submission"
+            >
+              <div class="sn-analysis-callout-header">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                What happens next?
+              </div>
+              <p>
+                Once submitted, your complaint will be carefully reviewed, the
+                relevant policies will be identified, and it will be sent to the
+                right support team — usually within minutes.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {# ── Submit Button ─────────────────────────────── #}
+        <button
+          type="submit"
+          class="sn-btn sn-btn-primary sn-btn-lg sn-btn-block"
+          id="submit-btn"
+        >
+          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+          Submit Complaint
+        </button>
+        <p
+          id="submission-unavailable"
+          class="sn-form-error"
+          role="alert"
+          aria-live="polite"
+          tabindex="-1"
+          hidden
+          style="display: none"
+        >
+          Complaint submission is not connected yet. Your details have not been
+          sent or saved. Keep this page open and try again when the service is
+          available.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  {# ── Right: Sidebar Info ───────────────────────────────────── #}
+  <aside aria-label="Helpful tips">
+    <div class="sn-info-card">
+      <h3>
+        <i
+          class="fas fa-lightbulb"
+          style="color: var(--sn-warning)"
+          aria-hidden="true"
+        ></i>
+        Tips for a quick resolution
+      </h3>
+      <ul>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Include your
+          order number if you have one
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Describe the
+          issue clearly — dates help
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Attach photos
+          or screenshots if relevant
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Let us know
+          what outcome you're hoping for
+        </li>
+      </ul>
     </div>
 
-    {# ── Right: Sidebar Info ───────────────────────────────────── #}
-    <aside aria-label="Helpful tips">
+    <div class="sn-info-card">
+      <h3>
+        <i
+          class="fas fa-clock"
+          style="color: var(--sn-accent)"
+          aria-hidden="true"
+        ></i>
+        What to expect
+      </h3>
+      <ul>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> The connected
+          service will issue a reference
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Support will
+          review your complaint
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Response times
+          depend on the host company
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Live tracking
+          appears after submission is connected
+        </li>
+      </ul>
+    </div>
 
-        <div class="sn-info-card">
-            <h3><i class="fas fa-lightbulb" style="color:var(--sn-warning);" aria-hidden="true"></i> Tips for a quick resolution</h3>
-            <ul>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Include your order number if you have one</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Describe the issue clearly — dates help</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Attach photos or screenshots if relevant</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Let us know what outcome you're hoping for</li>
-            </ul>
-        </div>
+    <div class="sn-info-card">
+      <h3>
+        <i
+          class="fas fa-shield-halved"
+          style="color: var(--sn-success)"
+          aria-hidden="true"
+        ></i>
+        Your privacy matters
+      </h3>
+      <ul>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Your
+          information is kept confidential
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Only used to
+          resolve your complaint
+        </li>
+        <li>
+          <i class="fas fa-check-circle" aria-hidden="true"></i> You can request
+          deletion at any time
+        </li>
+      </ul>
+    </div>
 
-        <div class="sn-info-card">
-            <h3><i class="fas fa-clock" style="color:var(--sn-accent);" aria-hidden="true"></i> What to expect</h3>
-            <ul>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> The connected service will issue a reference</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Support will review your complaint</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Response times depend on the host company</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Live tracking appears after submission is connected</li>
-            </ul>
-        </div>
-
-        <div class="sn-info-card">
-            <h3><i class="fas fa-shield-halved" style="color:var(--sn-success);" aria-hidden="true"></i> Your privacy matters</h3>
-            <ul>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Your information is kept confidential</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Only used to resolve your complaint</li>
-                <li><i class="fas fa-check-circle" aria-hidden="true"></i> You can request deletion at any time</li>
-            </ul>
-        </div>
-
-        <div class="sn-info-card" style="background:var(--sn-surface-2);">
-            <h3><i class="fas fa-magnifying-glass" style="color:var(--sn-text-muted);" aria-hidden="true"></i> Already submitted?</h3>
-            <p style="font-size:0.8rem;color:var(--sn-text-muted);margin:0 0 var(--sn-sm);">Use your reference number to check the status of an existing complaint.</p>
-            <a href="/support/track" class="sn-btn sn-btn-outline sn-btn-sm sn-btn-block">
-                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                Track a Complaint
-            </a>
-        </div>
-
-    </aside>
+    <div class="sn-info-card" style="background: var(--sn-surface-2)">
+      <h3>
+        <i
+          class="fas fa-magnifying-glass"
+          style="color: var(--sn-text-muted)"
+          aria-hidden="true"
+        ></i>
+        Already submitted?
+      </h3>
+      <p
+        style="
+          font-size: 0.8rem;
+          color: var(--sn-text-muted);
+          margin: 0 0 var(--sn-sm);
+        "
+      >
+        Use your reference number to check the status of an existing complaint.
+      </p>
+      <a
+        href="/support/track"
+        class="sn-btn sn-btn-outline sn-btn-sm sn-btn-block"
+      >
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        Track a Complaint
+      </a>
+    </div>
+  </aside>
 </div>
 
 {# ── Animated Analysis Overlay ──────────────────────────────────── #}
-<div id="sn-analysis-overlay" role="dialog" aria-modal="true" aria-labelledby="analysis-title">
-    <div class="sn-analysis-modal">
-        <div class="sn-analysis-spinner" aria-hidden="true">
-            <i class="fas fa-cog"></i>
-        </div>
-        <h2 id="analysis-title">Submitting your complaint…</h2>
-        <p>Please wait while we process your request. This only takes a moment.</p>
-
-        <ul class="sn-analysis-steps" aria-label="Processing steps">
-            <li class="sn-analysis-step" id="astep-1">
-                <span class="sn-analysis-step-icon"><i class="fas fa-upload" aria-hidden="true"></i></span>
-                <span>Receiving your complaint</span>
-            </li>
-            <li class="sn-analysis-step" id="astep-2">
-                <span class="sn-analysis-step-icon"><i class="fas fa-file-lines" aria-hidden="true"></i></span>
-                <span>Reading and understanding your issue</span>
-            </li>
-            <li class="sn-analysis-step" id="astep-3">
-                <span class="sn-analysis-step-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span>
-                <span>Checking relevant support policies</span>
-            </li>
-            <li class="sn-analysis-step" id="astep-4">
-                <span class="sn-analysis-step-icon"><i class="fas fa-people-group" aria-hidden="true"></i></span>
-                <span>Routing to the right support team</span>
-            </li>
-            <li class="sn-analysis-step" id="astep-5">
-                <span class="sn-analysis-step-icon"><i class="fas fa-check" aria-hidden="true"></i></span>
-                <span>Generating your reference number</span>
-            </li>
-        </ul>
+<div
+  id="sn-analysis-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="analysis-title"
+>
+  <div class="sn-analysis-modal">
+    <div class="sn-analysis-spinner" aria-hidden="true">
+      <i class="fas fa-cog"></i>
     </div>
+    <h2 id="analysis-title">Submitting your complaint…</h2>
+    <p>Please wait while we process your request. This only takes a moment.</p>
+
+    <ul class="sn-analysis-steps" aria-label="Processing steps">
+      <li class="sn-analysis-step" id="astep-1">
+        <span class="sn-analysis-step-icon"
+          ><i class="fas fa-upload" aria-hidden="true"></i
+        ></span>
+        <span>Receiving your complaint</span>
+      </li>
+      <li class="sn-analysis-step" id="astep-2">
+        <span class="sn-analysis-step-icon"
+          ><i class="fas fa-file-lines" aria-hidden="true"></i
+        ></span>
+        <span>Reading and understanding your issue</span>
+      </li>
+      <li class="sn-analysis-step" id="astep-3">
+        <span class="sn-analysis-step-icon"
+          ><i class="fas fa-book-open" aria-hidden="true"></i
+        ></span>
+        <span>Checking relevant support policies</span>
+      </li>
+      <li class="sn-analysis-step" id="astep-4">
+        <span class="sn-analysis-step-icon"
+          ><i class="fas fa-people-group" aria-hidden="true"></i
+        ></span>
+        <span>Routing to the right support team</span>
+      </li>
+      <li class="sn-analysis-step" id="astep-5">
+        <span class="sn-analysis-step-icon"
+          ><i class="fas fa-check" aria-hidden="true"></i
+        ></span>
+        <span>Generating your reference number</span>
+      </li>
+    </ul>
+  </div>
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    'use strict';
+  document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
 
     // ── Pre-fill category from URL param ──────────────────────
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category');
+    const categoryParam = urlParams.get("category");
     if (categoryParam) {
-        const sel = document.getElementById('category');
-        if (sel) {
-            for (let i = 0; i < sel.options.length; i++) {
-                if (sel.options[i].value === categoryParam || sel.options[i].text === categoryParam) {
-                    sel.selectedIndex = i;
-                    break;
-                }
-            }
+      const sel = document.getElementById("category");
+      if (sel) {
+        for (let i = 0; i < sel.options.length; i++) {
+          if (
+            sel.options[i].value === categoryParam ||
+            sel.options[i].text === categoryParam
+          ) {
+            sel.selectedIndex = i;
+            break;
+          }
         }
+      }
     }
 
     // ── File upload display ───────────────────────────────────
-    const fileInput  = document.getElementById('attachment');
-    const fileNameEl = document.getElementById('file-name-display');
-    const dropZone   = document.getElementById('file-drop-zone');
+    const fileInput = document.getElementById("attachment");
+    const fileNameEl = document.getElementById("file-name-display");
+    const dropZone = document.getElementById("file-drop-zone");
 
     if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            if (fileInput.files && fileInput.files.length > 0) {
-                fileNameEl.style.display = 'block';
-                fileNameEl.textContent   = '✓ ' + fileInput.files[0].name;
-            }
-        });
+      fileInput.addEventListener("change", function () {
+        if (fileInput.files && fileInput.files.length > 0) {
+          fileNameEl.style.display = "block";
+          fileNameEl.textContent = "✓ " + fileInput.files[0].name;
+        }
+      });
     }
     if (dropZone) {
-        dropZone.addEventListener('dragover',  function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
-        dropZone.addEventListener('dragleave', function ()  { dropZone.classList.remove('drag-over'); });
-        dropZone.addEventListener('drop',      function (e) {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                fileNameEl.style.display = 'block';
-                fileNameEl.textContent   = '✓ ' + e.dataTransfer.files[0].name;
-            }
-        });
+      dropZone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+      });
+      dropZone.addEventListener("dragleave", function () {
+        dropZone.classList.remove("drag-over");
+      });
+      dropZone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          fileNameEl.style.display = "block";
+          fileNameEl.textContent = "✓ " + e.dataTransfer.files[0].name;
+        }
+      });
     }
 
     // ── Form Validation ───────────────────────────────────────
     function showError(id, msg) {
-        const el = document.getElementById(id);
-        if (el) { el.textContent = msg; el.style.display = 'block'; }
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = msg;
+        el.style.display = "block";
+      }
     }
     function clearError(id) {
-        const el = document.getElementById(id);
-        if (el) { el.textContent = ''; el.style.display = 'none'; }
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = "";
+        el.style.display = "none";
+      }
     }
     function clearAllErrors() {
-        ['err-full-name', 'err-email', 'err-description', 'err-category'].forEach(clearError);
-        document.querySelectorAll('.sn-form-control').forEach(function (el) {
-            el.style.borderColor = '';
-        });
+      ["err-full-name", "err-email", "err-description", "err-category"].forEach(
+        clearError,
+      );
+      document.querySelectorAll(".sn-form-control").forEach(function (el) {
+        el.style.borderColor = "";
+      });
     }
     function validateForm() {
-        let valid = true;
-        clearAllErrors();
+      let valid = true;
+      clearAllErrors();
 
-        const name = document.getElementById('full-name');
-        if (!name.value.trim()) {
-            showError('err-full-name', 'Please enter your full name.');
-            name.style.borderColor = 'var(--sn-danger)';
-            valid = false;
-        }
+      const name = document.getElementById("full-name");
+      if (!name.value.trim()) {
+        showError("err-full-name", "Please enter your full name.");
+        name.style.borderColor = "var(--sn-danger)";
+        valid = false;
+      }
 
-        const email = document.getElementById('email');
-        const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email.value.trim() || !emailRx.test(email.value.trim())) {
-            showError('err-email', 'Please enter a valid email address.');
-            email.style.borderColor = 'var(--sn-danger)';
-            valid = false;
-        }
+      const email = document.getElementById("email");
+      const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email.value.trim() || !emailRx.test(email.value.trim())) {
+        showError("err-email", "Please enter a valid email address.");
+        email.style.borderColor = "var(--sn-danger)";
+        valid = false;
+      }
 
-        const desc = document.getElementById('description');
-        if (!desc.value.trim() || desc.value.trim().length < 20) {
-            showError('err-description', 'Please describe your issue in at least 20 characters.');
-            desc.style.borderColor = 'var(--sn-danger)';
-            valid = false;
-        }
+      const desc = document.getElementById("description");
+      if (!desc.value.trim() || desc.value.trim().length < 20) {
+        showError(
+          "err-description",
+          "Please describe your issue in at least 20 characters.",
+        );
+        desc.style.borderColor = "var(--sn-danger)";
+        valid = false;
+      }
 
-        const cat = document.getElementById('category');
-        if (!cat.value) {
-            showError('err-category', 'Please select a category.');
-            cat.style.borderColor = 'var(--sn-danger)';
-            valid = false;
-        }
+      const cat = document.getElementById("category");
+      if (!cat.value) {
+        showError("err-category", "Please select a category.");
+        cat.style.borderColor = "var(--sn-danger)";
+        valid = false;
+      }
 
-        return valid;
-    }
-
-    // ── Generate Complaint ID ─────────────────────────────────
-    function generateComplaintId() {
-        // DEMO ONLY: The backend must generate the production complaint reference.
-        const digits = Math.floor(10000 + Math.random() * 90000);
-        return 'DEMO-' + digits;
-    }
-
-    // ── Animated Analysis Steps ───────────────────────────────
-    function runAnalysisAnimation(complaintId, onComplete) {
-        const overlay  = document.getElementById('sn-analysis-overlay');
-        const steps    = ['astep-1', 'astep-2', 'astep-3', 'astep-4', 'astep-5'];
-        const delays   = [0, 700, 1500, 2400, 3200];
-        const durations= [600, 750, 800, 750, 700];
-
-        overlay.classList.add('show');
-
-        steps.forEach(function (id, idx) {
-            // Activate step
-            setTimeout(function () {
-                document.getElementById(id).classList.add('step-active');
-            }, delays[idx]);
-
-            // Mark done
-            setTimeout(function () {
-                const el = document.getElementById(id);
-                el.classList.remove('step-active');
-                el.classList.add('step-done');
-                el.querySelector('.sn-analysis-step-icon').innerHTML = '<i class="fas fa-check"></i>';
-            }, delays[idx] + durations[idx]);
-        });
-
-        // After all steps complete
-        const totalTime = delays[steps.length - 1] + durations[steps.length - 1] + 500;
-        setTimeout(function () {
-            overlay.classList.remove('show');
-            onComplete(complaintId);
-        }, totalTime);
-    }
-
-    // ── Show Success State ─────────────────────────────────────
-    function showSuccess(complaintId) {
-        const formContainer = document.getElementById('sn-form-container');
-        const successState  = document.getElementById('sn-success-state');
-        const idDisplay     = document.getElementById('generated-complaint-id');
-        const viewBtn       = document.getElementById('view-complaint-btn');
-
-        formContainer.style.display = 'none';
-        successState.style.display  = 'block';
-        idDisplay.textContent        = complaintId;
-
-        // Update progress steps
-        ['prog-step-1', 'prog-step-2'].forEach(function (id) {
-            const el = document.getElementById(id);
-            el.classList.remove('active');
-            el.classList.add('done');
-            el.querySelector('.sn-prog-circle').innerHTML = '<i class="fas fa-check"></i>';
-        });
-        const step3 = document.getElementById('prog-step-3');
-        step3.classList.add('active');
-        step3.setAttribute('aria-current', 'step');
-
-        // Link to detail page
-        // BACKEND INTEGRATION: Replace with url_for('support.complaint_detail', id=complaintId)
-        viewBtn.href = '/support/dashboard';
-
-        // Scroll to top of content
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      return valid;
     }
 
     // ── Form Submission ───────────────────────────────────────
-    const form      = document.getElementById('sn-complaint-form');
-    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById("sn-complaint-form");
+    const unavailableMessage = document.getElementById(
+      "submission-unavailable",
+    );
 
     if (form) {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (!validateForm()) return;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!validateForm()) return;
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Processing…';
-
-            const complaintId = generateComplaintId();
-
-            // BACKEND INTEGRATION:
-            // Replace this animation-only flow with a real fetch/XHR POST:
-            // fetch('/support/submit', {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
-            //   body: JSON.stringify(formData)
-            // }).then(res => res.json()).then(data => { runAnalysisAnimation(data.id, showSuccess); });
-
-            // Do not simulate AI or policy processing before a backend is connected.
-            showSuccess(complaintId);
-        });
+        // BACKEND INTEGRATION: POST the validated form and attachment to the complaint service.
+        unavailableMessage.hidden = false;
+        unavailableMessage.style.display = "block";
+        unavailableMessage.focus();
+      });
     }
-
-    // ── Submit Another button ─────────────────────────────────
-    const submitAnotherBtn = document.getElementById('submit-another-btn');
-    if (submitAnotherBtn) {
-        submitAnotherBtn.addEventListener('click', function () {
-            // Reset form
-            if (form) form.reset();
-            clearAllErrors();
-            if (fileNameEl) { fileNameEl.style.display = 'none'; fileNameEl.textContent = ''; }
-
-            // Reset submit button
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane" aria-hidden="true"></i> Submit Complaint';
-
-            // Reset progress steps
-            ['prog-step-1', 'prog-step-2', 'prog-step-3'].forEach(function (id, idx) {
-                const el = document.getElementById(id);
-                el.classList.remove('done', 'active');
-                el.removeAttribute('aria-current');
-                const circle = el.querySelector('.sn-prog-circle');
-                if (idx === 0) {
-                    el.classList.add('active');
-                    el.setAttribute('aria-current', 'step');
-                    circle.innerHTML = '<i class="fas fa-pen"></i>';
-                } else {
-                    circle.textContent = idx + 1;
-                }
-            });
-
-            // Reset analysis steps
-            ['astep-1','astep-2','astep-3','astep-4','astep-5'].forEach(function (id, idx) {
-                const el = document.getElementById(id);
-                el.classList.remove('step-active', 'step-done');
-                const icons = ['fa-upload','fa-file-lines','fa-book-open','fa-people-group','fa-check'];
-                el.querySelector('.sn-analysis-step-icon').innerHTML = '<i class="fas ' + icons[idx] + '"></i>';
-            });
-
-            document.getElementById('sn-success-state').style.display = 'none';
-            document.getElementById('sn-form-container').style.display = 'block';
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-});
+  });
 </script>
 {% endblock %}

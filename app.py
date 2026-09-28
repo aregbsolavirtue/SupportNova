@@ -32,11 +32,11 @@ def track_order():
 
 @app.route('/help-center.html')
 def help_center():
-    return render_template('help-center.html')
+    return redirect('/support/')
 
 @app.route('/complaint.html')
 def complaint():
-    return render_template('complaint.html')
+    return redirect('/support/submit')
 
 @app.route('/account.html')
 def account():
