@@ -1,0 +1,101 @@
+rule_id,category,subcategory,department,condition,urgency,priority,escalate,escalation_level,refund_allowed,replacement_allowed,max_compensation_usd,sla_first_response_hours,sla_resolution_hours,policy_id
+R001,Product Defect,Dead on Arrival,Returns and Refunds,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P01
+R002,Product Defect,Dead on Arrival,Returns and Refunds,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P01
+R003,Product Defect,Dead on Arrival,Returns and Refunds,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P01
+R004,Product Defect,Dead on Arrival,Returns and Refunds,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R005,Product Defect,Damaged in Transit,Returns and Refunds,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P01
+R006,Product Defect,Damaged in Transit,Returns and Refunds,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P01
+R007,Product Defect,Damaged in Transit,Returns and Refunds,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P01
+R008,Product Defect,Damaged in Transit,Returns and Refunds,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R009,Product Defect,Malfunction After Use,Technical Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P04
+R010,Product Defect,Malfunction After Use,Technical Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P04
+R011,Product Defect,Malfunction After Use,Technical Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P04
+R012,Product Defect,Malfunction After Use,Technical Support,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R013,Billing,Duplicate Charge,Billing,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P06
+R014,Billing,Duplicate Charge,Billing,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P06
+R015,Billing,Duplicate Charge,Billing,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P06
+R016,Billing,Duplicate Charge,Billing,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R017,Billing,Incorrect Charge,Billing,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P06
+R018,Billing,Incorrect Charge,Billing,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P06
+R019,Billing,Incorrect Charge,Billing,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P06
+R020,Billing,Incorrect Charge,Billing,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R021,Billing,Subscription Renewal,Billing,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P07
+R022,Billing,Subscription Renewal,Billing,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P07
+R023,Billing,Subscription Renewal,Billing,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P07
+R024,Billing,Subscription Renewal,Billing,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R025,Delivery,Delayed Delivery,Logistics Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P05
+R026,Delivery,Delayed Delivery,Logistics Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P05
+R027,Delivery,Delayed Delivery,Logistics Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P05
+R028,Delivery,Delayed Delivery,Logistics Support,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R029,Delivery,Lost Package,Logistics Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P05
+R030,Delivery,Lost Package,Logistics Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P05
+R031,Delivery,Lost Package,Logistics Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P05
+R032,Delivery,Lost Package,Logistics Support,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R033,Delivery,Wrong Item Delivered,Logistics Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P05
+R034,Delivery,Wrong Item Delivered,Logistics Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P05
+R035,Delivery,Wrong Item Delivered,Logistics Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P05
+R036,Delivery,Wrong Item Delivered,Logistics Support,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R037,Refund,Refund Delay,Returns and Refunds,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P02
+R038,Refund,Refund Delay,Returns and Refunds,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P02
+R039,Refund,Refund Delay,Returns and Refunds,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P02
+R040,Refund,Refund Delay,Returns and Refunds,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R041,Refund,Refund Denied,Returns and Refunds,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P02
+R042,Refund,Refund Denied,Returns and Refunds,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P02
+R043,Refund,Refund Denied,Returns and Refunds,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P02
+R044,Refund,Refund Denied,Returns and Refunds,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R045,Refund,Partial Refund Dispute,Returns and Refunds,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P02
+R046,Refund,Partial Refund Dispute,Returns and Refunds,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P02
+R047,Refund,Partial Refund Dispute,Returns and Refunds,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P02
+R048,Refund,Partial Refund Dispute,Returns and Refunds,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R049,Warranty,Claim Rejected,Warranty Services,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P08
+R050,Warranty,Claim Rejected,Warranty Services,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P08
+R051,Warranty,Claim Rejected,Warranty Services,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P08
+R052,Warranty,Claim Rejected,Warranty Services,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R053,Warranty,Repair Delay,Warranty Services,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P08
+R054,Warranty,Repair Delay,Warranty Services,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P08
+R055,Warranty,Repair Delay,Warranty Services,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P08
+R056,Warranty,Repair Delay,Warranty Services,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R057,Account,Login Problem,Technical Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P09
+R058,Account,Login Problem,Technical Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P09
+R059,Account,Login Problem,Technical Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P09
+R060,Account,Login Problem,Technical Support,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R061,Account,Account Locked,Account Security,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P10
+R062,Account,Account Locked,Account Security,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Specialist Team,Yes,Yes,10,2,24,P10
+R063,Account,Account Locked,Account Security,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P10
+R064,Account,Account Locked,Account Security,Repeat contact - same issue reported 3+ times,High,P1,Yes,Supervisor Review,Conditional,Conditional,5,2,24,P13
+R065,Account,Unauthorized Account Change,Account Security,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P10
+R066,Account,Unauthorized Account Change,Account Security,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Critical Management Escalation,Yes,Yes,10,2,24,P10
+R067,Account,Unauthorized Account Change,Account Security,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P10
+R068,Technical Support,Setup Help,Technical Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P09
+R069,Technical Support,Setup Help,Technical Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P09
+R070,Technical Support,Setup Help,Technical Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P09
+R071,Technical Support,Software or Firmware Issue,Technical Support,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P09
+R072,Technical Support,Software or Firmware Issue,Technical Support,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P09
+R073,Technical Support,Software or Firmware Issue,Technical Support,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P09
+R074,Service Quality,Long Wait Time,Customer Relations,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P11
+R075,Service Quality,Long Wait Time,Customer Relations,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P11
+R076,Service Quality,Long Wait Time,Customer Relations,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P11
+R077,Service Quality,Repeated Unresolved Contact,Customer Relations,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P13
+R078,Service Quality,Repeated Unresolved Contact,Customer Relations,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P13
+R079,Service Quality,Repeated Unresolved Contact,Customer Relations,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P13
+R080,Staff Behavior,Rude Agent,Customer Relations,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P11
+R081,Staff Behavior,Rude Agent,Customer Relations,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P11
+R082,Staff Behavior,Rude Agent,Customer Relations,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P11
+R083,Staff Behavior,Misleading Information,Customer Relations,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P11
+R084,Staff Behavior,Misleading Information,Customer Relations,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Department Manager,Yes,Yes,10,2,24,P11
+R085,Staff Behavior,Misleading Information,Customer Relations,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P11
+R086,Privacy and Security,Data Exposure,Compliance and Privacy,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P12
+R087,Privacy and Security,Data Exposure,Compliance and Privacy,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Critical Management Escalation,Yes,Yes,10,2,24,P12
+R088,Privacy and Security,Data Exposure,Compliance and Privacy,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P12
+R089,Privacy and Security,Unwanted Marketing,Compliance and Privacy,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P12
+R090,Privacy and Security,Unwanted Marketing,Compliance and Privacy,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Specialist Team,Yes,Yes,10,2,24,P12
+R091,Privacy and Security,Unwanted Marketing,Compliance and Privacy,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P12
+R092,Privacy and Security,Suspected Fraud,Account Security,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P10
+R093,Privacy and Security,Suspected Fraud,Account Security,"Severe, repeated, high-value, or safety-linked version of the issue",High,P1,Yes,Critical Management Escalation,Yes,Yes,10,2,24,P10
+R094,Privacy and Security,Suspected Fraud,Account Security,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P10
+R095,Safety,Overheating Battery,Product Safety,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P03
+R096,Safety,Overheating Battery,Product Safety,"Severe, repeated, high-value, or safety-linked version of the issue",Critical,P0,Yes,Critical Management Escalation,Yes,Yes,25,1,8,P03
+R097,Safety,Overheating Battery,Product Safety,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P03
+R098,Safety,Fire or Shock Risk,Product Safety,"Standard case, first report, within normal window",Medium,P2,No,No Escalation,Conditional,Conditional,0,8,72,P03
+R099,Safety,Fire or Shock Risk,Product Safety,"Severe, repeated, high-value, or safety-linked version of the issue",Critical,P0,Yes,Critical Management Escalation,Yes,Yes,25,1,8,P03
+R100,Safety,Fire or Shock Risk,Product Safety,"Minor or informational version, no material impact",Low,P3,No,No Escalation,No,No,0,24,168,P03
