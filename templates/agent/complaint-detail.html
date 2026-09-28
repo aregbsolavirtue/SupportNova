@@ -1,0 +1,1202 @@
+{% extends "supportnova_base.html" %}
+
+{% block title %}Complaint Detail — SupportNova{% endblock %}
+
+{% block user_role %}Agent{% endblock %}
+
+{# ── Sidebar ─────────────────────────────────────────────────── #}
+{% block sidebar %}
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Overview</div>
+    <a href="/agent/dashboard" class="sn-nav-link">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/agent/complaints" class="sn-nav-link active" aria-current="page">
+        <i class="fas fa-inbox"></i> My Complaints
+        <span class="sn-nav-badge" id="sidebar-assigned-count">24</span>
+    </a>
+    <a href="/agent/escalations" class="sn-nav-link">
+        <i class="fas fa-fire"></i> Escalations
+        <span class="sn-nav-badge">3</span>
+    </a>
+    <a href="/agent/awaiting" class="sn-nav-link">
+        <i class="fas fa-hourglass-half"></i> Awaiting Customer
+        <span class="sn-nav-badge badge-warning">5</span>
+    </a>
+    <a href="/agent/manual-review" class="sn-nav-link">
+        <i class="fas fa-user-check"></i> Manual Review
+        <span class="sn-nav-badge badge-warning">2</span>
+    </a>
+</div>
+
+<div class="sn-sidebar-divider"></div>
+
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Tools</div>
+    <a href="/agent/search" class="sn-nav-link">
+        <i class="fas fa-search"></i> Search Complaints
+    </a>
+    <a href="/agent/reports" class="sn-nav-link">
+        <i class="fas fa-chart-bar"></i> Reports
+    </a>
+</div>
+
+<div class="sn-sidebar-section" style="margin-top: auto; border-top: 1px solid var(--sn-border); padding-top: var(--sn-sm);">
+    {# BACKEND INTEGRATION: Use config.COMPANY_URL #}
+    <a href="/" class="sn-nav-link" style="font-size: 0.8rem;">
+        <i class="fas fa-arrow-left"></i> Return to VoltCart
+    </a>
+</div>
+{% endblock %}
+
+{# ── Page-specific CSS ─────────────────────────────────────────── #}
+{% block extra_css %}
+<style>
+    /* Suggested response quote box */
+    .sn-response-quote {
+        background: var(--sn-surface-2);
+        border-left: 4px solid var(--sn-ai-color);
+        border-radius: 0 var(--sn-radius-md) var(--sn-radius-md) 0;
+        padding: var(--sn-md) var(--sn-lg);
+        font-size: 0.875rem;
+        color: var(--sn-text);
+        line-height: 1.7;
+        font-style: italic;
+        margin: var(--sn-sm) 0;
+    }
+
+    /* Section label above a group */
+    .sn-section-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--sn-text-muted);
+        margin-bottom: var(--sn-sm);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* KV rows inside cards */
+    .sn-kv-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sn-sm) var(--sn-xl);
+    }
+    @media (max-width: 600px) { .sn-kv-grid { grid-template-columns: 1fr; } }
+
+    .sn-kv-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .sn-kv-key {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--sn-text-muted);
+    }
+    .sn-kv-val {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--sn-text);
+    }
+
+    /* Customer info strip */
+    .sn-customer-strip {
+        display: flex;
+        align-items: center;
+        gap: var(--sn-lg);
+        flex-wrap: wrap;
+        background: var(--sn-surface-2);
+        border-radius: var(--sn-radius-md);
+        padding: var(--sn-sm) var(--sn-md);
+        margin-bottom: var(--sn-md);
+        font-size: 0.8rem;
+    }
+    .sn-customer-strip-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--sn-text-muted);
+    }
+    .sn-customer-strip-item strong { color: var(--sn-text); }
+
+    /* Escalation warning banner */
+    .sn-escalation-banner {
+        background: rgba(239,68,68,0.08);
+        border: 1.5px solid rgba(239,68,68,0.3);
+        border-radius: var(--sn-radius-md);
+        padding: var(--sn-sm) var(--sn-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--sn-sm);
+        font-size: 0.875rem;
+        color: #991b1b;
+        font-weight: 600;
+        margin-bottom: var(--sn-md);
+    }
+
+    /* Status sidebar card */
+    .sn-status-detail-card {
+        background: var(--sn-surface);
+        border: 1px solid var(--sn-border);
+        border-radius: var(--sn-radius-lg);
+        box-shadow: var(--sn-shadow-sm);
+        overflow: hidden;
+        margin-bottom: var(--sn-lg);
+    }
+
+    /* Verification status pill */
+    .sn-verification-status {
+        display: flex;
+        align-items: center;
+        gap: var(--sn-sm);
+        padding: var(--sn-md) var(--sn-lg);
+        border-radius: var(--sn-radius-md);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: var(--sn-md);
+    }
+    .sn-verification-status.verified {
+        background: var(--sn-success-light);
+        color: var(--sn-success);
+        border: 1px solid rgba(16,185,129,0.2);
+    }
+    .sn-verification-status.manual-review {
+        background: rgba(124,58,237,0.08);
+        color: var(--sn-ai-color);
+        border: 1px solid rgba(124,58,237,0.2);
+    }
+    .sn-verification-status.mismatch {
+        background: var(--sn-danger-light);
+        color: var(--sn-danger);
+        border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    /* Attachment placeholder */
+    .sn-attachment-placeholder {
+        border: 2px dashed var(--sn-border);
+        border-radius: var(--sn-radius-md);
+        padding: var(--sn-md);
+        text-align: center;
+        color: var(--sn-text-muted);
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{# ── Main Content ──────────────────────────────────────────────── #}
+{% block content %}
+<div class="sn-fade-in" id="complaint-detail-root">
+
+    {# ── Breadcrumb ─────────────────────────────────────────── #}
+    <nav class="sn-breadcrumb" aria-label="Breadcrumb">
+        <a href="/agent/dashboard"><i class="fas fa-tachometer-alt"></i> Agent Dashboard</a>
+        <span class="sep" aria-hidden="true">›</span>
+        <span id="breadcrumb-id" aria-current="page">Loading…</span>
+    </nav>
+
+    {# ── Page Header ────────────────────────────────────────── #}
+    <div class="sn-page-header" id="page-header">
+        <div>
+            <div style="display:flex;align-items:center;gap:var(--sn-sm);flex-wrap:wrap;margin-bottom:var(--sn-xs);">
+                <h1 class="sn-page-title" id="complaint-title" style="margin:0;">Loading complaint…</h1>
+                <span id="header-status-badge"></span>
+                <span id="header-priority-badge"></span>
+            </div>
+            <p class="sn-page-subtitle" id="complaint-subtitle">Loading…</p>
+        </div>
+        <div class="sn-page-actions">
+            <a href="/agent/dashboard" class="sn-btn sn-btn-ghost sn-btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <button class="sn-btn sn-btn-outline sn-btn-sm" onclick="window.print()" aria-label="Print this complaint">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    {# Escalation warning (shown/hidden by JS) #}
+    <div class="sn-escalation-banner" id="escalation-banner" style="display:none;" role="alert">
+        <i class="fas fa-fire"></i>
+        <span id="escalation-banner-text">This complaint has been escalated and requires immediate attention.</span>
+    </div>
+
+    {# ── Split Layout ────────────────────────────────────────── #}
+    <div class="sn-split-layout">
+
+        {# ═══════════════════════════════════════════════════════
+           LEFT COLUMN — Main Analysis Content
+           ═══════════════════════════════════════════════════════ #}
+        <div id="left-column">
+
+            {# ── Section 1: Customer Complaint Card ──────────── #}
+            <div class="sn-card" style="margin-bottom: var(--sn-lg);" id="section-complaint">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title">
+                        <i class="fas fa-comment-alt" style="color:var(--sn-accent);"></i>
+                        Customer Complaint
+                    </h2>
+                    <span id="complaint-id-badge" class="sn-font-mono" style="color:var(--sn-accent);font-size:0.82rem;font-weight:700;"></span>
+                </div>
+                <div class="sn-card-body">
+                    {# Customer info strip #}
+                    <div class="sn-customer-strip" id="customer-strip" role="group" aria-label="Customer information">
+                        <div class="sn-customer-strip-item">
+                            <i class="fas fa-user" style="color:var(--sn-accent);"></i>
+                            <strong id="customer-name">—</strong>
+                        </div>
+                        <div class="sn-customer-strip-item">
+                            <i class="fas fa-envelope"></i>
+                            <span id="customer-email">—</span>
+                        </div>
+                        <div class="sn-customer-strip-item">
+                            <i class="fas fa-id-badge"></i>
+                            <span>Ref: <strong id="customer-ref">—</strong></span>
+                        </div>
+                    </div>
+
+                    {# Complaint title #}
+                    <h3 id="complaint-heading" style="font-size:1rem;font-weight:700;color:var(--sn-primary);margin:0 0 var(--sn-md);">—</h3>
+
+                    {# Full description #}
+                    <div class="sn-section-label"><i class="fas fa-align-left"></i> Description</div>
+                    <p id="complaint-description" style="font-size:0.875rem;color:var(--sn-text);line-height:1.7;margin-bottom:var(--sn-md);">—</p>
+
+                    {# Order / Product details #}
+                    <div class="sn-kv-grid" style="margin-bottom:var(--sn-md);" id="complaint-meta-grid">
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key"><i class="fas fa-shopping-bag"></i> Order Reference</span>
+                            <span class="sn-kv-val" id="meta-order-ref">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key"><i class="fas fa-box"></i> Product</span>
+                            <span class="sn-kv-val" id="meta-product">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key"><i class="fas fa-calendar-alt"></i> Submitted</span>
+                            <span class="sn-kv-val" id="meta-submitted">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key"><i class="fas fa-sync-alt"></i> Last Updated</span>
+                            <span class="sn-kv-val" id="meta-updated">—</span>
+                        </div>
+                    </div>
+
+                    {# Attachment placeholder #}
+                    {# BACKEND INTEGRATION: Render real attachments from complaint.attachments[] #}
+                    <div class="sn-attachment-placeholder">
+                        <i class="fas fa-paperclip" style="font-size:1.2rem;margin-bottom:4px;"></i><br>
+                        No attachments — <a href="#" style="color:var(--sn-accent);">upload a file</a> or drag &amp; drop here.
+                    </div>
+                </div>
+            </div>
+
+            {# ── Section 2: AI Analysis Card ─────────────────── #}
+            <div class="sn-ai-card" style="margin-bottom: var(--sn-lg);" id="section-ai">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title" style="color:var(--sn-ai-color);">
+                        <i class="fas fa-brain"></i>
+                        AI Recommendation
+                    </h2>
+                    <div style="display:flex;align-items:center;gap:var(--sn-sm);">
+                        <span class="sn-badge sn-badge-ai"><i class="fas fa-robot"></i> AI Generated</span>
+                        <span class="sn-text-xs sn-text-muted" id="ai-generated-at">—</span>
+                    </div>
+                </div>
+                <div class="sn-card-body">
+
+                    {# Key-value: Category, Dept, Priority, Urgency, Sentiment #}
+                    <div class="sn-kv-grid" style="margin-bottom:var(--sn-lg);" id="ai-kv-grid">
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key">Category</span>
+                            <span id="ai-category" class="sn-kv-val">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key">Department</span>
+                            <span id="ai-department" class="sn-kv-val">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key">Priority</span>
+                            <span id="ai-priority">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key">Urgency</span>
+                            <span id="ai-urgency" class="sn-kv-val">—</span>
+                        </div>
+                        <div class="sn-kv-item">
+                            <span class="sn-kv-key">Sentiment</span>
+                            <span id="ai-sentiment">—</span>
+                        </div>
+                    </div>
+
+                    <div class="sn-divider"></div>
+
+                    {# Recommended Resolution #}
+                    <div class="sn-section-label" style="color:var(--sn-ai-color);">
+                        <i class="fas fa-lightbulb"></i> Recommended Resolution
+                    </div>
+                    <p id="ai-resolution" style="font-size:0.875rem;line-height:1.7;color:var(--sn-text);margin-bottom:var(--sn-lg);">—</p>
+
+                    {# Suggested Response #}
+                    <div class="sn-section-label" style="color:var(--sn-ai-color);">
+                        <i class="fas fa-comment-dots"></i> Suggested Customer Response
+                    </div>
+                    <div class="sn-response-quote" id="ai-suggested-response">—</div>
+
+                    <div class="sn-divider"></div>
+
+                    {# Policy References #}
+                    <div class="sn-section-label" style="color:var(--sn-ai-color);">
+                        <i class="fas fa-book-open"></i> Policy References
+                    </div>
+                    <div id="ai-policy-refs">
+                        {# BACKEND INTEGRATION: Rendered from complaint.aiRecommendation.policyRefs[] #}
+                    </div>
+
+                </div>
+            </div>
+
+            {# ── Section 3: Deterministic Validation Card ──────── #}
+            <div class="sn-validation-card" style="margin-bottom: var(--sn-lg);" id="section-validation">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title" style="color:var(--sn-rule-color);">
+                        <i class="fas fa-shield-alt"></i>
+                        Deterministic Validation
+                    </h2>
+                    <div style="display:flex;align-items:center;gap:var(--sn-sm);">
+                        <span class="sn-badge sn-badge-rule"><i class="fas fa-cogs"></i> Rule Engine</span>
+                        <span id="validation-status-badge"></span>
+                    </div>
+                </div>
+                <div class="sn-card-body">
+                    <div class="sn-section-label" style="color:var(--sn-rule-color);">
+                        <i class="fas fa-list-check"></i> Validation Checks
+                    </div>
+                    {# BACKEND INTEGRATION: Rendered from complaint.validation.checks[] #}
+                    <ul class="sn-check-list" id="validation-checks" aria-label="Validation check results">
+                        <li class="sn-check-item">
+                            <span class="sn-check-icon pending"><i class="fas fa-spinner fa-spin"></i></span>
+                            <span>Loading validation checks…</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="sn-card-footer">
+                    <div style="display:flex;align-items:center;gap:var(--sn-sm);">
+                        <span style="font-size:0.8rem;font-weight:600;color:var(--sn-text-muted);">Overall Validation Status:</span>
+                        <span id="validation-footer-badge"></span>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Section 4: AI vs Rule Engine Comparison ─────── #}
+            <div class="sn-card" style="margin-bottom: var(--sn-lg);" id="section-comparison">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title">
+                        <i class="fas fa-code-branch" style="color:var(--sn-accent);"></i>
+                        Verification Comparison
+                    </h2>
+                    <span id="comparison-verification-badge"></span>
+                </div>
+                <div class="sn-card-body">
+
+                    {# Verification Status Pill #}
+                    <div id="verification-status-pill" class="sn-verification-status" role="status" aria-live="polite"></div>
+
+                    {# Comparison Table #}
+                    <div class="sn-table-wrap" style="margin-bottom:var(--sn-md);">
+                        <table class="sn-comparison-table" aria-label="AI vs Rule Engine comparison">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Field</th>
+                                    <th scope="col" class="col-ai"><i class="fas fa-robot"></i> AI Model</th>
+                                    <th scope="col" class="col-rule"><i class="fas fa-cogs"></i> Rule Engine</th>
+                                    <th scope="col">Match</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-tbody">
+                                <tr>
+                                    <td colspan="4" style="text-align:center;color:var(--sn-text-muted);padding:1.5rem;">
+                                        Loading comparison…
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {# Mismatch reason alert (shown only when manual review is needed) #}
+                    <div id="mismatch-alert" style="display:none;" role="alert"></div>
+
+                    {# Send to Manual Review CTA (shown by JS when verification requires it) #}
+                    <div id="manual-review-cta" style="display:none;">
+                        <div class="sn-divider"></div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sn-sm);">
+                            <div>
+                                <div style="font-weight:700;color:var(--sn-text);margin-bottom:2px;">Manual Review Required</div>
+                                <div style="font-size:0.8rem;color:var(--sn-text-muted);">This complaint needs human reviewer intervention before processing.</div>
+                            </div>
+                            <button class="sn-btn sn-btn-warning" id="btn-send-review">
+                                <i class="fas fa-user-check"></i> Send to Manual Review
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {# ── Section 5: Agent Actions ─────────────────────── #}
+            <div class="sn-card" id="section-actions">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title">
+                        <i class="fas fa-bolt" style="color:var(--sn-accent);"></i>
+                        Agent Actions
+                    </h2>
+                </div>
+                <div class="sn-card-body">
+                    <div class="sn-decision-actions">
+                        <button class="sn-btn sn-btn-primary" id="btn-respond" aria-label="Respond to customer">
+                            <i class="fas fa-reply"></i> Respond to Customer
+                        </button>
+                        <button class="sn-btn sn-btn-danger" id="btn-escalate" aria-label="Escalate complaint">
+                            <i class="fas fa-fire"></i> Escalate
+                        </button>
+                        <button class="sn-btn sn-btn-outline" id="btn-awaiting" aria-label="Mark as awaiting customer">
+                            <i class="fas fa-hourglass-half"></i> Mark Awaiting Customer
+                        </button>
+                        <button class="sn-btn sn-btn-success" id="btn-resolve" aria-label="Mark complaint as resolved">
+                            <i class="fas fa-check-circle"></i> Mark Resolved
+                        </button>
+                        <button class="sn-btn sn-btn-ghost" id="btn-note" aria-label="Add internal note">
+                            <i class="fas fa-sticky-note"></i> Add Internal Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /#left-column -->
+
+        {# ═══════════════════════════════════════════════════════
+           RIGHT COLUMN — Status sidebar
+           ═══════════════════════════════════════════════════════ #}
+        <aside id="right-column" aria-label="Complaint status and history">
+
+            {# ── Complaint Status Card ──────────────────────── #}
+            <div class="sn-status-detail-card">
+                <div class="sn-card-header">
+                    <h3 class="sn-card-title" style="font-size:0.8rem;">
+                        <i class="fas fa-info-circle" style="color:var(--sn-accent);"></i>
+                        Complaint Status
+                    </h3>
+                </div>
+                <div class="sn-card-body" style="padding: var(--sn-md) var(--sn-lg);">
+                    {# Large status badge #}
+                    <div style="margin-bottom:var(--sn-md);text-align:center;">
+                        <div id="sidebar-status-badge" style="font-size:1.1rem;"></div>
+                    </div>
+
+                    <ul class="sn-detail-list" id="status-detail-list">
+                        <li class="sn-detail-item">
+                            <span class="sn-detail-key"><i class="fas fa-flag"></i> Priority</span>
+                            <span class="sn-detail-value" id="sidebar-priority">—</span>
+                        </li>
+                        <li class="sn-detail-item">
+                            <span class="sn-detail-key"><i class="fas fa-face-frown"></i> Sentiment</span>
+                            <span class="sn-detail-value" id="sidebar-sentiment">—</span>
+                        </li>
+                        <li class="sn-detail-item">
+                            <span class="sn-detail-key"><i class="fas fa-building"></i> Department</span>
+                            <span class="sn-detail-value" id="sidebar-department">—</span>
+                        </li>
+                        <li class="sn-detail-item">
+                            <span class="sn-detail-key"><i class="fas fa-fire"></i> Escalation</span>
+                            <span class="sn-detail-value" id="sidebar-escalation">—</span>
+                        </li>
+                        <li class="sn-detail-item">
+                            <span class="sn-detail-key"><i class="fas fa-user-tie"></i> Assigned Agent</span>
+                            <span class="sn-detail-value" id="sidebar-agent">—</span>
+                        </li>
+                    </ul>
+
+                    {# SLA indicator #}
+                    <div style="margin-top:var(--sn-md);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                            <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sn-text-muted);">SLA Status</span>
+                            <span id="sla-label" style="font-size:0.75rem;font-weight:700;">—</span>
+                        </div>
+                        <div style="background:var(--sn-border);border-radius:var(--sn-radius-pill);height:6px;overflow:hidden;">
+                            <div id="sla-bar" style="height:100%;border-radius:inherit;width:0%;transition:width 0.6s ease;"></div>
+                        </div>
+                        <div id="sla-sublabel" style="font-size:0.7rem;color:var(--sn-text-muted);margin-top:4px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Timeline Card ─────────────────────────────── #}
+            <div class="sn-status-detail-card">
+                <div class="sn-card-header">
+                    <h3 class="sn-card-title" style="font-size:0.8rem;">
+                        <i class="fas fa-history" style="color:var(--sn-accent);"></i>
+                        Status Timeline
+                    </h3>
+                </div>
+                <div class="sn-card-body" style="padding: var(--sn-md) var(--sn-lg);">
+                    <div class="sn-timeline" id="timeline-container" role="list" aria-label="Complaint status timeline">
+                        <div class="sn-timeline-item">
+                            <div class="sn-timeline-dot pending"></div>
+                            <div class="sn-timeline-title pending">Loading…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Latest Update Card ──────────────────────── #}
+            <div class="sn-status-detail-card">
+                <div class="sn-card-header">
+                    <h3 class="sn-card-title" style="font-size:0.8rem;">
+                        <i class="fas fa-bell" style="color:var(--sn-accent);"></i>
+                        Latest Update
+                    </h3>
+                </div>
+                <div class="sn-card-body" style="padding: var(--sn-md) var(--sn-lg);">
+                    <p id="latest-update-text" style="font-size:0.875rem;line-height:1.6;color:var(--sn-text);margin:0;">—</p>
+                    <div id="resolution-box" style="display:none;margin-top:var(--sn-md);">
+                        <div class="sn-section-label"><i class="fas fa-check-double"></i> Resolution</div>
+                        <p id="resolution-text" style="font-size:0.8rem;color:var(--sn-text-muted);line-height:1.6;margin:0;"></p>
+                    </div>
+                </div>
+            </div>
+
+        </aside><!-- /#right-column -->
+    </div><!-- /.sn-split-layout -->
+</div><!-- /#complaint-detail-root -->
+
+{# ── Respond Modal ──────────────────────────────────────────────── #}
+<div class="sn-modal-overlay" id="modal-respond" role="dialog" aria-modal="true" aria-labelledby="modal-respond-title">
+    <div class="sn-modal">
+        <div class="sn-modal-header">
+            <h3 class="sn-modal-title" id="modal-respond-title">
+                <i class="fas fa-reply" style="color:var(--sn-accent);margin-right:6px;"></i>
+                Respond to Customer
+            </h3>
+            <button class="sn-btn-icon" data-sn-close="modal-respond" aria-label="Close respond modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sn-modal-body">
+            <div class="sn-alert sn-alert-info" style="margin-bottom:var(--sn-md);">
+                <i class="fas fa-info-circle"></i>
+                <span>The AI suggested response below is pre-populated from the analysis. Review and edit before sending.</span>
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="respond-subject">Subject</label>
+                <input type="text" class="sn-form-control" id="respond-subject"
+                    placeholder="Re: Your complaint [SN-XXXXX]" aria-required="true">
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="respond-body">
+                    Message <span class="required" aria-label="required">*</span>
+                </label>
+                <textarea class="sn-form-control" id="respond-body" rows="7"
+                    placeholder="Type your response to the customer here…"
+                    required aria-required="true"></textarea>
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="respond-channel">Send Via</label>
+                <select class="sn-form-control" id="respond-channel">
+                    <option value="email">Email</option>
+                    <option value="portal">Customer Portal</option>
+                    <option value="sms">SMS</option>
+                </select>
+            </div>
+        </div>
+        <div class="sn-modal-footer">
+            <button class="sn-btn sn-btn-ghost" data-sn-close="modal-respond">Cancel</button>
+            <button class="sn-btn sn-btn-primary" id="submit-respond">
+                <i class="fas fa-paper-plane"></i> Send Response
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ── Escalate Modal ─────────────────────────────────────────────── #}
+<div class="sn-modal-overlay" id="modal-escalate" role="dialog" aria-modal="true" aria-labelledby="modal-escalate-title">
+    <div class="sn-modal">
+        <div class="sn-modal-header">
+            <h3 class="sn-modal-title" id="modal-escalate-title">
+                <i class="fas fa-fire" style="color:var(--sn-danger);margin-right:6px;"></i>
+                Escalate Complaint
+            </h3>
+            <button class="sn-btn-icon" data-sn-close="modal-escalate" aria-label="Close escalation modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sn-modal-body">
+            <div class="sn-alert sn-alert-warning" style="margin-bottom:var(--sn-md);">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Escalating will notify the department head and mark this complaint as <strong>Escalated</strong>.</span>
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="escalate-reason">
+                    Escalation Reason <span class="required" aria-label="required">*</span>
+                </label>
+                <textarea class="sn-form-control" id="escalate-reason" rows="4"
+                    placeholder="Describe why this complaint needs escalation…"
+                    required aria-required="true"></textarea>
+            </div>
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="escalate-to">Escalate To</label>
+                <select class="sn-form-control" id="escalate-to">
+                    {# BACKEND INTEGRATION: Populate with {{ departments }} from context #}
+                    <option value="dept-head">Department Head</option>
+                    <option value="senior-agent">Senior Agent</option>
+                    <option value="management">Management</option>
+                </select>
+            </div>
+        </div>
+        <div class="sn-modal-footer">
+            <button class="sn-btn sn-btn-ghost" data-sn-close="modal-escalate">Cancel</button>
+            <button class="sn-btn sn-btn-danger" id="submit-escalate">
+                <i class="fas fa-fire"></i> Confirm Escalation
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ── Internal Note Modal ─────────────────────────────────────────── #}
+<div class="sn-modal-overlay" id="modal-note" role="dialog" aria-modal="true" aria-labelledby="modal-note-title">
+    <div class="sn-modal">
+        <div class="sn-modal-header">
+            <h3 class="sn-modal-title" id="modal-note-title">
+                <i class="fas fa-sticky-note" style="color:var(--sn-accent);margin-right:6px;"></i>
+                Add Internal Note
+            </h3>
+            <button class="sn-btn-icon" data-sn-close="modal-note" aria-label="Close note modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sn-modal-body">
+            <div class="sn-form-group">
+                <label class="sn-form-label" for="note-text">
+                    Note <span class="required" aria-label="required">*</span>
+                </label>
+                <textarea class="sn-form-control" id="note-text" rows="5"
+                    placeholder="Internal note — only visible to agents and reviewers…"
+                    required aria-required="true"></textarea>
+            </div>
+            <div class="sn-form-hint">
+                <i class="fas fa-lock" style="color:var(--sn-text-light);"></i>
+                This note is <strong>internal only</strong> and will not be visible to the customer.
+            </div>
+        </div>
+        <div class="sn-modal-footer">
+            <button class="sn-btn sn-btn-ghost" data-sn-close="modal-note">Cancel</button>
+            <button class="sn-btn sn-btn-primary" id="submit-note">
+                <i class="fas fa-save"></i> Save Note
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{# ── Page-specific JavaScript ──────────────────────────────────── #}
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    // ── State ────────────────────────────────────────────────────
+    let currentComplaint = null;
+
+    // ── Boot ─────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        const id = getComplaintIdFromUrl();
+        loadComplaint(id);
+        bindActionButtons();
+    });
+
+    // ── Get complaint ID from URL ─────────────────────────────────
+    function getComplaintIdFromUrl() {
+        // BACKEND INTEGRATION: In production, use Flask route param:
+        // /agent/complaint/<id> and pass {{ complaint_id }} from Jinja context.
+        const params = new URLSearchParams(window.location.search);
+        const routeId = {{ (complaint_id or '')|tojson }};
+        return routeId || params.get('id') || 'SN-10482';
+    }
+
+    // ── Load complaint data ───────────────────────────────────────
+    function loadComplaint(id) {
+        // BACKEND INTEGRATION: Replace with real API:
+        // fetch('/api/complaints/' + id)
+        //   .then(r => r.json())
+        //   .then(data => renderAll(data))
+        //   .catch(err => showError(err));
+        const complaints = (window.MOCK_DATA && MOCK_DATA.complaints) ? MOCK_DATA.complaints : [];
+        const complaint = complaints.find(function (c) { return c.id === id; });
+
+        if (!complaint) {
+            showNotFound(id);
+            return;
+        }
+
+        currentComplaint = complaint;
+        renderAll(complaint);
+    }
+
+    // ── Render everything ─────────────────────────────────────────
+    function renderAll(c) {
+        renderPageHeader(c);
+        renderComplaintSection(c);
+        renderAISection(c);
+        renderValidationSection(c);
+        renderComparisonSection(c);
+        renderStatusSidebar(c);
+        renderTimeline(c);
+        renderLatestUpdate(c);
+        prefillRespondModal(c);
+    }
+
+    // ── Page header + breadcrumb + escalation banner ──────────────
+    function renderPageHeader(c) {
+        setHtml('breadcrumb-id', escHtml(c.id));
+        document.title = c.id + ' — SupportNova';
+
+        setHtml('complaint-title', escHtml(c.title));
+        setHtml('complaint-subtitle',
+            'Category: <strong>' + escHtml(c.category) + '</strong>' +
+            ' &nbsp;·&nbsp; Dept: <strong>' + escHtml(c.department) + '</strong>' +
+            ' &nbsp;·&nbsp; Submitted ' + SN.timeAgo(c.submittedAt)
+        );
+
+        setHtml('header-status-badge',   SN.statusBadge(c.status));
+        setHtml('header-priority-badge', SN.priorityBadge(c.priority));
+
+        if (c.escalationFlag) {
+            const banner = document.getElementById('escalation-banner');
+            if (banner) {
+                banner.style.display = 'flex';
+                setHtml('escalation-banner-text',
+                    '<strong>Escalated:</strong> This complaint requires immediate attention. SLA breach risk is high.');
+            }
+        }
+    }
+
+    // ── Section 1: Customer Complaint ────────────────────────────
+    function renderComplaintSection(c) {
+        setHtml('complaint-id-badge', escHtml(c.id));
+        setHtml('customer-name',      escHtml(c.customer.name));
+        setHtml('customer-email',     escHtml(c.customer.email));
+        setHtml('customer-ref',       escHtml(c.customer.ref));
+        setHtml('complaint-heading',  escHtml(c.title));
+        setHtml('complaint-description', escHtml(c.description));
+        setHtml('meta-order-ref', c.orderRef ? escHtml(c.orderRef) : '<span class="sn-text-muted">—</span>');
+        setHtml('meta-product',   c.product   ? escHtml(c.product)  : '<span class="sn-text-muted">—</span>');
+        setText('meta-submitted', SN.formatDateTime(c.submittedAt));
+        setText('meta-updated',   SN.formatDateTime(c.updatedAt));
+    }
+
+    // ── Section 2: AI Analysis ───────────────────────────────────
+    function renderAISection(c) {
+        if (!c.aiRecommendation) return;
+        const ai = c.aiRecommendation;
+
+        setText('ai-generated-at', 'Generated: ' + SN.formatDateTime(ai.generatedAt));
+        setText('ai-category',    ai.category   || '—');
+        setText('ai-department',  ai.department || '—');
+        setHtml('ai-priority',    SN.priorityBadge(ai.priority));
+        setText('ai-urgency',     ai.urgency    || '—');
+        setHtml('ai-sentiment',   SN.sentimentBadge(ai.sentiment));
+        setText('ai-resolution',  ai.resolution || '—');
+        setText('ai-suggested-response', ai.suggestedResponse || '—');
+
+        // Policy references
+        const policyContainer = document.getElementById('ai-policy-refs');
+        if (policyContainer && ai.policyRefs && ai.policyRefs.length > 0) {
+            policyContainer.innerHTML = ai.policyRefs.map(function (ref) {
+                return [
+                    '<div class="sn-policy-ref">',
+                    '  <div class="sn-policy-ref-title">',
+                    '    <i class="fas fa-book" style="margin-right:6px;color:var(--sn-accent);"></i>',
+                    '    ' + escHtml(ref.title),
+                    '  </div>',
+                    '  <p class="sn-policy-ref-text">' + escHtml(ref.excerpt) + '</p>',
+                    '</div>',
+                ].join('\n');
+            }).join('\n');
+        } else if (policyContainer) {
+            policyContainer.innerHTML = '<p class="sn-text-muted sn-text-sm">No policy references available.</p>';
+        }
+    }
+
+    // ── Section 3: Deterministic Validation ──────────────────────
+    function renderValidationSection(c) {
+        if (!c.validation) return;
+        const v = c.validation;
+
+        // Status badge in header
+        setHtml('validation-status-badge', SN.validationBadge(v.status));
+        setHtml('validation-footer-badge', SN.validationBadge(v.status));
+
+        // Check list
+        const list = document.getElementById('validation-checks');
+        if (list && v.checks && v.checks.length > 0) {
+            list.innerHTML = v.checks.map(function (check) {
+                const iconMap = {
+                    pass:    { cls: 'pass',    icon: 'fa-check' },
+                    fail:    { cls: 'fail',    icon: 'fa-times' },
+                    warning: { cls: 'warning', icon: 'fa-exclamation' },
+                };
+                const iconInfo = iconMap[check.result] || iconMap.warning;
+
+                let noteHtml = '';
+                if (check.note) {
+                    noteHtml = '<div style="font-size:0.75rem;color:var(--sn-text-muted);margin-top:2px;">' +
+                               '<i class="fas fa-info-circle"></i> ' + escHtml(check.note) + '</div>';
+                }
+
+                return [
+                    '<li class="sn-check-item" role="listitem">',
+                    '  <span class="sn-check-icon ' + iconInfo.cls + '" aria-label="' + check.result + '">',
+                    '    <i class="fas ' + iconInfo.icon + '"></i>',
+                    '  </span>',
+                    '  <div style="flex:1;">',
+                    '    <div style="font-size:0.875rem;color:var(--sn-text);">' + escHtml(check.label) + '</div>',
+                    '    ' + noteHtml,
+                    '  </div>',
+                    '</li>',
+                ].join('\n');
+            }).join('\n');
+        } else if (list) {
+            list.innerHTML = '<li class="sn-check-item sn-text-muted">No validation checks available.</li>';
+        }
+    }
+
+    // ── Section 4: AI vs Rule Engine Comparison ──────────────────
+    function renderComparisonSection(c) {
+        const ai = c.aiRecommendation || {};
+        const v  = c.validation       || {};
+
+        // Build comparison rows using SN.buildComparisonRow
+        // BACKEND INTEGRATION: Rule engine values come from c.validation.ruleDecisions
+        // or a separate /api/complaints/:id/validation endpoint.
+        // For mock purposes we derive rule values from the complaint's own fields,
+        // as the rule engine would produce the same result when validation passes.
+
+        // Determine rule engine values (mock: same as complaint properties which
+        // the rule engine is expected to derive independently).
+        const ruleCategory   = c.category;
+        const ruleDept       = c.department;
+        const rulePriority   = c.priority;
+        const ruleEscalation = c.escalationFlag ? 'Yes' : 'No';
+
+        const aiEscalation = (ai.urgency === 'High' || ai.urgency === 'Urgent') ? 'Yes' : 'No';
+
+        const tbody = document.getElementById('comparison-tbody');
+        if (tbody) {
+            tbody.innerHTML = [
+                SN.buildComparisonRow('Category',             ai.category   || '—', ruleCategory   || '—'),
+                SN.buildComparisonRow('Department',           ai.department || '—', ruleDept       || '—'),
+                SN.buildComparisonRow('Priority',             ai.priority   || '—', rulePriority   || '—'),
+                SN.buildComparisonRow('Escalation Required',  aiEscalation,         ruleEscalation),
+            ].join('\n');
+        }
+
+        // Verification status pill
+        const vs = v.verificationStatus || 'Manual Review Required';
+        const pillEl = document.getElementById('verification-status-pill');
+        if (pillEl) {
+            let pillClass = 'manual-review';
+            let pillIcon  = 'fa-user-check';
+            let pillText  = vs;
+
+            if (vs === 'Verified') {
+                pillClass = 'verified';
+                pillIcon  = 'fa-shield-check';
+            } else if (vs === 'Mismatch') {
+                pillClass = 'mismatch';
+                pillIcon  = 'fa-times-circle';
+            }
+
+            pillEl.className = 'sn-verification-status ' + pillClass;
+            pillEl.innerHTML = '<i class="fas ' + pillIcon + '"></i> Verification Status: <strong>' + escHtml(vs) + '</strong>';
+        }
+
+        // Badge in header
+        setHtml('comparison-verification-badge', SN.verificationBadge(vs));
+
+        // Mismatch / manual review alert
+        if (v.mismatchReason) {
+            const alertEl = document.getElementById('mismatch-alert');
+            if (alertEl) {
+                alertEl.style.display = 'flex';
+                alertEl.className = 'sn-alert sn-alert-warning';
+                alertEl.innerHTML =
+                    '<i class="fas fa-exclamation-triangle"></i>' +
+                    '<div><strong>Mismatch Reason:</strong> ' + escHtml(v.mismatchReason) + '</div>';
+            }
+        }
+
+        // Show CTA if manual review required
+        if (vs !== 'Verified') {
+            const cta = document.getElementById('manual-review-cta');
+            if (cta) cta.style.display = 'block';
+        }
+    }
+
+    // ── Right sidebar: Status card ────────────────────────────────
+    function renderStatusSidebar(c) {
+        setHtml('sidebar-status-badge', SN.statusBadge(c.status));
+        setHtml('sidebar-priority',     SN.priorityBadge(c.priority));
+        setHtml('sidebar-sentiment',    SN.sentimentBadge(c.sentiment));
+        setText('sidebar-department',   c.department   || '—');
+        setText('sidebar-agent',        c.assignedAgent || 'Unassigned');
+        setHtml('sidebar-escalation',
+            c.escalationFlag
+                ? '<span style="color:var(--sn-danger);font-weight:700;"><i class="fas fa-fire"></i> Yes</span>'
+                : '<span style="color:var(--sn-success);"><i class="fas fa-check"></i> No</span>'
+        );
+
+        // SLA indicator — mock SLA logic based on status and escalation
+        // BACKEND INTEGRATION: Replace with real SLA data from API
+        const slaLabel   = document.getElementById('sla-label');
+        const slaBar     = document.getElementById('sla-bar');
+        const slaSub     = document.getElementById('sla-sublabel');
+
+        if (c.status === 'Resolved' || c.status === 'Closed') {
+            if (slaLabel) { slaLabel.textContent = 'Resolved'; slaLabel.style.color = 'var(--sn-success)'; }
+            if (slaBar)   { slaBar.style.width = '100%'; slaBar.style.background = 'var(--sn-success)'; }
+            if (slaSub)     slaSub.textContent = 'Case closed within SLA.';
+        } else if (c.escalationFlag) {
+            if (slaLabel) { slaLabel.textContent = 'At Risk'; slaLabel.style.color = 'var(--sn-danger)'; }
+            if (slaBar)   { slaBar.style.width = '85%'; slaBar.style.background = 'var(--sn-danger)'; }
+            if (slaSub)     slaSub.textContent = 'SLA breach imminent — escalated case.';
+        } else {
+            if (slaLabel) { slaLabel.textContent = 'On Track'; slaLabel.style.color = 'var(--sn-success)'; }
+            if (slaBar)   { slaBar.style.width = '60%'; slaBar.style.background = 'var(--sn-success)'; }
+            if (slaSub)     slaSub.textContent = 'Within SLA window.';
+        }
+    }
+
+    // ── Right sidebar: Timeline ───────────────────────────────────
+    function renderTimeline(c) {
+        const container = document.getElementById('timeline-container');
+        if (!container || !c.timeline || c.timeline.length === 0) return;
+
+        container.innerHTML = c.timeline.map(function (item, idx) {
+            const isActive  = item.status === c.status && item.done;
+            const isPending = !item.done;
+            const isDone    = item.done && !isActive;
+
+            let dotClass   = isPending ? 'pending' : (isActive ? 'active' : 'done');
+            let titleClass = isPending ? 'pending' : (isActive ? 'active' : 'done');
+
+            // Last done item is "active" (current state)
+            const lastDoneIdx = c.timeline.reduce(function (acc, t, i) {
+                return t.done ? i : acc;
+            }, -1);
+            if (idx === lastDoneIdx) {
+                dotClass   = 'active';
+                titleClass = 'active';
+            }
+
+            return [
+                '<div class="sn-timeline-item" role="listitem">',
+                '  <div class="sn-timeline-dot ' + dotClass + '" aria-hidden="true"></div>',
+                '  <div class="sn-timeline-title ' + titleClass + '">' + escHtml(item.label) + '</div>',
+                '  <div class="sn-timeline-meta">',
+                item.date
+                    ? SN.formatDateTime(item.date)
+                    : '<em style="color:var(--sn-text-light);">Pending</em>',
+                '  </div>',
+                '</div>',
+            ].join('\n');
+        }).join('\n');
+    }
+
+    // ── Right sidebar: Latest update ─────────────────────────────
+    function renderLatestUpdate(c) {
+        setText('latest-update-text', c.latestUpdate || 'No updates yet.');
+
+        if (c.resolution) {
+            const box = document.getElementById('resolution-box');
+            if (box) box.style.display = 'block';
+            setText('resolution-text', c.resolution);
+        }
+    }
+
+    // ── Prefill respond modal with AI suggested response ──────────
+    function prefillRespondModal(c) {
+        const subjectEl = document.getElementById('respond-subject');
+        const bodyEl    = document.getElementById('respond-body');
+
+        if (subjectEl) subjectEl.value = 'Re: Your complaint ' + c.id + ' — ' + c.title;
+        if (bodyEl && c.aiRecommendation && c.aiRecommendation.suggestedResponse) {
+            bodyEl.value = c.aiRecommendation.suggestedResponse;
+        }
+    }
+
+    // ── Bind action buttons ───────────────────────────────────────
+    function bindActionButtons() {
+        // Respond to Customer
+        const btnRespond = document.getElementById('btn-respond');
+        if (btnRespond) {
+            btnRespond.addEventListener('click', function () {
+                SN.openModal('modal-respond');
+            });
+        }
+
+        // Escalate
+        const btnEscalate = document.getElementById('btn-escalate');
+        if (btnEscalate) {
+            btnEscalate.addEventListener('click', function () {
+                SN.openModal('modal-escalate');
+            });
+        }
+
+        // Mark Awaiting Customer
+        const btnAwaiting = document.getElementById('btn-awaiting');
+        if (btnAwaiting) {
+            btnAwaiting.addEventListener('click', function () {
+                // BACKEND INTEGRATION: PATCH /api/complaints/:id { status: 'Awaiting Customer' }
+                SN.toast('Complaint marked as Awaiting Customer.', 'info');
+                if (currentComplaint) {
+                    currentComplaint.status = 'Awaiting Customer';
+                    setHtml('sidebar-status-badge',   SN.statusBadge('Awaiting Customer'));
+                    setHtml('header-status-badge',    SN.statusBadge('Awaiting Customer'));
+                }
+            });
+        }
+
+        // Mark Resolved
+        const btnResolve = document.getElementById('btn-resolve');
+        if (btnResolve) {
+            btnResolve.addEventListener('click', function () {
+                // BACKEND INTEGRATION: PATCH /api/complaints/:id { status: 'Resolved' }
+                SN.toast('Complaint marked as Resolved.', 'success');
+                if (currentComplaint) {
+                    currentComplaint.status = 'Resolved';
+                    setHtml('sidebar-status-badge',  SN.statusBadge('Resolved'));
+                    setHtml('header-status-badge',   SN.statusBadge('Resolved'));
+                }
+            });
+        }
+
+        // Add Internal Note — open modal
+        const btnNote = document.getElementById('btn-note');
+        if (btnNote) {
+            btnNote.addEventListener('click', function () {
+                SN.openModal('modal-note');
+            });
+        }
+
+        // Submit respond modal
+        const submitRespond = document.getElementById('submit-respond');
+        if (submitRespond) {
+            submitRespond.addEventListener('click', function () {
+                const body = (document.getElementById('respond-body') || {}).value;
+                if (!body || !body.trim()) {
+                    SN.toast('Please enter a response message before sending.', 'warning');
+                    return;
+                }
+                // BACKEND INTEGRATION: POST /api/complaints/:id/respond
+                SN.toast('Response sent to customer successfully.', 'success');
+                SN.closeModal('modal-respond');
+            });
+        }
+
+        // Submit escalation modal
+        const submitEscalate = document.getElementById('submit-escalate');
+        if (submitEscalate) {
+            submitEscalate.addEventListener('click', function () {
+                const reason = (document.getElementById('escalate-reason') || {}).value;
+                if (!reason || !reason.trim()) {
+                    SN.toast('Please provide an escalation reason.', 'warning');
+                    return;
+                }
+                // BACKEND INTEGRATION: POST /api/complaints/:id/escalate
+                SN.toast('Complaint escalated to department head.', 'warning');
+                SN.closeModal('modal-escalate');
+                if (currentComplaint) {
+                    currentComplaint.status = 'Escalated';
+                    currentComplaint.escalationFlag = true;
+                    setHtml('sidebar-status-badge', SN.statusBadge('Escalated'));
+                    setHtml('header-status-badge',  SN.statusBadge('Escalated'));
+                    const banner = document.getElementById('escalation-banner');
+                    if (banner) banner.style.display = 'flex';
+                }
+            });
+        }
+
+        // Submit note modal
+        const submitNote = document.getElementById('submit-note');
+        if (submitNote) {
+            submitNote.addEventListener('click', function () {
+                const text = (document.getElementById('note-text') || {}).value;
+                if (!text || !text.trim()) {
+                    SN.toast('Please enter a note before saving.', 'warning');
+                    return;
+                }
+                // BACKEND INTEGRATION: POST /api/complaints/:id/notes
+                SN.toast('Internal note saved.', 'success');
+                SN.closeModal('modal-note');
+                document.getElementById('note-text').value = '';
+            });
+        }
+
+        // Send to Manual Review button (in comparison section)
+        const btnSendReview = document.getElementById('btn-send-review');
+        if (btnSendReview) {
+            btnSendReview.addEventListener('click', function () {
+                // BACKEND INTEGRATION: POST /api/complaints/:id/send-review
+                SN.toast('Sending to manual review…', 'info');
+                setTimeout(function () {
+                    // Navigate to reviewer queue after brief delay
+                    window.location.href = '/reviewer/';
+                }, 1200);
+            });
+        }
+    }
+
+    // ── Not found state ───────────────────────────────────────────
+    function showNotFound(id) {
+        const root = document.getElementById('complaint-detail-root');
+        if (!root) return;
+        root.innerHTML = [
+            '<div class="sn-empty-state" style="padding-top:4rem;">',
+            '  <div class="sn-empty-state-icon"><i class="fas fa-search"></i></div>',
+            '  <h3>Complaint Not Found</h3>',
+            '  <p>No complaint with ID <strong>' + escHtml(id) + '</strong> was found.</p>',
+            '  <a href="/agent/dashboard" class="sn-btn sn-btn-primary">',
+            '    <i class="fas fa-arrow-left"></i> Back to Dashboard',
+            '  </a>',
+            '</div>',
+        ].join('\n');
+    }
+
+    // ── DOM Helpers ───────────────────────────────────────────────
+    function setHtml(id, html) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    }
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+
+    function escHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+})();
+</script>
+{% endblock %}

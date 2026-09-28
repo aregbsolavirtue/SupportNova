@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Submit a Complaint - VoltCart Support{% endblock %}
+
+{% block extra_css %}
+<style>
+    .complaint-container {
+        max-width: 700px;
+        margin: var(--spacing-section) auto;
+        background: var(--color-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+    .complaint-header {
+        background: var(--color-navy);
+        color: var(--color-white);
+        padding: var(--spacing-xl);
+        text-align: center;
+    }
+    .complaint-header h2 { color: var(--color-white); margin-bottom: var(--spacing-xs); }
+    .complaint-header p { margin: 0; color: rgba(255,255,255,0.8); }
+    
+    .complaint-form {
+        padding: var(--spacing-xl);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+    @media (max-width: 576px) { .form-row { grid-template-columns: 1fr; } }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .supportnova-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-lg);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+        font-size: 0.875rem;
+    }
+    .supportnova-badge img {
+        height: 20px;
+        filter: grayscale(100%);
+        opacity: 0.6;
+    }
+
+    /* Success state */
+    #success-state {
+        padding: var(--spacing-xl);
+        text-align: center;
+        display: none;
+    }
+    #success-state i {
+        font-size: 4rem;
+        color: var(--color-spark);
+        background: var(--color-navy);
+        border-radius: 50%;
+        width: 100px; height: 100px;
+        line-height: 100px;
+        margin-bottom: var(--spacing-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="complaint-container">
+        <div class="complaint-header">
+            <h2>Submit a Request</h2>
+            <p>Tell us what went wrong. We'll make it right.</p>
+        </div>
+        
+        <form class="complaint-form" id="complaint-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" required placeholder="john@example.com">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Order Number (Optional)</label>
+                    <input type="text" class="form-control" placeholder="VC-123456">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Issue Category</label>
+                    <select class="form-control" required>
+                        <option value="">Select an option</option>
+                        <option value="delivery">Delivery Delay / Missing Item</option>
+                        <option value="defective">Defective / Damaged Product</option>
+                        <option value="wrong_item">Received Wrong Item</option>
+                        <option value="refund">Refund / Return Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" required placeholder="Please describe the issue in detail..."></textarea>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: var(--spacing-lg);">
+                <label class="form-label">Attachments (Optional)</label>
+                <input type="file" class="form-control" style="padding: 0.5rem;" accept="image/*,.pdf">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block" style="height: 50px; font-size: 1.125rem;">
+                Submit Complaint
+            </button>
+            
+            <div class="supportnova-badge">
+                <span>Powered by</span>
+                <strong>SupportNova™</strong>
+            </div>
+        </form>
+
+        <div id="success-state">
+            <i class="fas fa-check"></i>
+            <h3 style="margin-bottom: var(--spacing-sm);">Request Submitted</h3>
+            <p class="text-muted" style="margin-bottom: var(--spacing-lg);">Your request has been received by our intelligent support system. We have sent a confirmation email to your address.</p>
+            <p><strong>Ticket ID: <span id="ticket-id">SN-000</span></strong></p>
+            <a href="/" class="btn btn-outline" style="margin-top: var(--spacing-md);">Return to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('complaint-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Mock submission
+        const form = document.getElementById('complaint-form');
+        const success = document.getElementById('success-state');
+        
+        // Generate random ticket
+        document.getElementById('ticket-id').textContent = 'SN-' + Math.floor(Math.random() * 100000);
+        
+        form.style.display = 'none';
+        success.style.display = 'block';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "supportnova_base.html" %}
+{% block title %}{% if tracking %}Track a complaint{% elif history %}Complaint history{% else %}My complaints{% endif %} — SupportNova{% endblock %}
+{% block user_role %}Customer{% endblock %}
+{% block sidebar %}
+<div class="sn-sidebar-section"><div class="sn-sidebar-label">Your support</div>
+<a href="/support/" class="sn-nav-link"><i class="fas fa-house"></i> Help Center</a>
+<a href="/support/submit" class="sn-nav-link"><i class="fas fa-plus"></i> Submit a complaint</a>
+<a href="/support/dashboard" class="sn-nav-link {% if not history and not tracking %}active{% endif %}"><i class="fas fa-inbox"></i> My complaints</a>
+<a href="/support/history" class="sn-nav-link {% if history %}active{% endif %}"><i class="fas fa-clock-rotate-left"></i> History</a>
+<a href="/support/track" class="sn-nav-link {% if tracking %}active{% endif %}"><i class="fas fa-magnifying-glass"></i> Track a complaint</a>
+</div>
+{% endblock %}
+{% block content %}
+<div class="sn-page-header"><div><span class="sn-eyebrow">CUSTOMER SUPPORT</span><h1 class="sn-page-title">{% if tracking %}Track a complaint{% elif history %}Complaint history{% else %}Your complaints{% endif %}</h1><p class="sn-page-subtitle">{% if tracking %}Enter your complaint reference to view its latest update.{% else %}Updates and resolutions from your conversations with support.{% endif %}</p></div><a class="sn-btn sn-btn-primary" href="/support/submit"><i class="fas fa-plus"></i> New complaint</a></div>
+{% if tracking %}<section class="sn-card sn-track-card"><form id="track-form"><label for="track-ref">Complaint reference</label><div class="sn-track-row"><input class="sn-input" id="track-ref" placeholder="e.g. SN-10482" required><button class="sn-btn sn-btn-primary" type="submit">Find complaint</button></div><p class="sn-help-text">Your reference is in the confirmation message you received after submitting.</p></form></section>{% endif %}
+{% if not tracking %}<div class="sn-stats-grid sn-customer-stats"><article class="sn-stat-card"><div class="sn-stat-label">All complaints</div><div class="sn-stat-value" id="customer-total">—</div><div class="sn-stat-change neutral">Across your account</div></article><article class="sn-stat-card"><div class="sn-stat-label">In progress</div><div class="sn-stat-value" id="customer-open">—</div><div class="sn-stat-change neutral">Support is working on these</div></article><article class="sn-stat-card"><div class="sn-stat-label">Resolved</div><div class="sn-stat-value" id="customer-resolved">—</div><div class="sn-stat-change neutral">Completed cases</div></article></div>
+<section class="sn-card"><div class="sn-card-header"><div><h2 class="sn-card-title">Recent updates</h2><p class="sn-card-subtitle">Select a complaint to see its full timeline.</p></div><label class="sn-search-wrap"><i class="fas fa-search"></i><input id="customer-search" type="search" placeholder="Search complaints" aria-label="Search complaints"></label></div><div class="sn-table-wrap"><table class="sn-table"><thead><tr><th>Complaint</th><th>Category</th><th>Status</th><th>Submitted</th><th>Latest update</th><th></th></tr></thead><tbody id="customer-cases"><tr><td colspan="6"><div class="sn-empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading your complaints…</p></div></td></tr></tbody></table></div><div id="customer-empty" class="sn-empty-state" hidden><div class="sn-empty-icon"><i class="fas fa-inbox"></i></div><h3>No complaints to show</h3><p>When you contact support, your updates will appear here.</p><a href="/support/submit" class="sn-btn sn-btn-primary">Submit a complaint</a></div></section>{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // DEMO ONLY: simulate one signed-in customer. Replace with the authenticated
+  // customer's complaint collection from the backend to preserve data scope.
+  const complaints = ((window.MOCK_DATA && window.MOCK_DATA.complaints) || []).filter(c => c.customer && c.customer.ref === 'CUST-4821');
+  const tbody = document.getElementById('customer-cases');
+  if (tbody) {
+    const open = complaints.filter(c => !['Resolved','Closed'].includes(c.status));
+    document.getElementById('customer-total').textContent = complaints.length;
+    document.getElementById('customer-open').textContent = open.length;
+    document.getElementById('customer-resolved').textContent = complaints.length - open.length;
+    const render = query => {
+      const rows = complaints.filter(c => `${c.id} ${c.title} ${c.category} ${c.status}`.toLowerCase().includes(query.toLowerCase()));
+      tbody.innerHTML = rows.map(c => `<tr><td data-label="Complaint"><a class="sn-case-link" href="/support/complaint/${encodeURIComponent(c.id)}"><strong>${c.title}</strong><small>${c.id}</small></a></td><td data-label="Category">${c.category}</td><td data-label="Status">${SN.statusBadge(c.status)}</td><td data-label="Submitted">${SN.formatDate(c.submittedAt)}</td><td data-label="Latest update"><span class="sn-update-text">${c.latestUpdate || 'Your complaint was received.'}</span><small>${SN.timeAgo(c.updatedAt)}</small></td><td data-label="View"><a href="/support/complaint/${encodeURIComponent(c.id)}" class="sn-btn sn-btn-ghost sn-btn-sm">View details <i class="fas fa-arrow-right"></i></a></td></tr>`).join('');
+      document.getElementById('customer-empty').hidden = rows.length > 0;
+    };
+    render(''); document.getElementById('customer-search').addEventListener('input', e => render(e.target.value));
+  }
+  const track = document.getElementById('track-form');
+  if (track) track.addEventListener('submit', e => { e.preventDefault(); const ref = document.getElementById('track-ref').value.trim(); if(ref) location.href='/support/complaint/'+encodeURIComponent(ref); });
+});
+</script>
+{% endblock %}
