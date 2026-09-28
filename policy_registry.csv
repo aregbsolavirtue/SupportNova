@@ -1,0 +1,21 @@
+policy_id,title,version,status,precedence_level,owner_department,file_name
+P01,Damaged and Defective Items Policy,1.0,Active,3,Returns and Refunds,P01_Damaged_and_Defective_Items_Policy_v1.0.pdf
+P02,Refund Policy,2.0,Active,4,Returns and Refunds,P02_Refund_Policy_v2.0.docx
+P02OLD,Refund Policy,1.0,Old,4,Returns and Refunds,P02OLD_Refund_Policy_v1.0.docx
+P02DRAFT,Refund Policy,3.0,Draft,4,Returns and Refunds,P02DRAFT_Refund_Policy_v3.0.docx
+P03,Product Safety Incident Policy,1.2,Active,1,Product Safety,P03_Product_Safety_Incident_Policy_v1.2.pdf
+P04,Technical Support and Troubleshooting Policy,1.0,Active,3,Technical Support,P04_Technical_Support_and_Troubleshooting_Policy_v1.0.pdf
+P05,Shipping and Delivery Policy,1.0,Active,3,Logistics Support,P05_Shipping_and_Delivery_Policy_v1.0.pdf
+P06,Billing Errors Policy,1.0,Active,3,Billing,P06_Billing_Errors_Policy_v1.0.pdf
+P07,Subscription and Renewal Policy,1.0,Active,3,Billing,P07_Subscription_and_Renewal_Policy_v1.0.pdf
+P08,Warranty Policy,1.0,Active,3,Warranty Services,P08_Warranty_Policy_v1.0.pdf
+P09,Account and Technical Access Policy,1.0,Active,3,Technical Support,P09_Account_and_Technical_Access_Policy_v1.0.pdf
+P10,Account Security and Fraud Policy,1.0,Active,2,Account Security,P10_Account_Security_and_Fraud_Policy_v1.0.docx
+P11,Service Quality and Staff Conduct Policy,1.0,Active,3,Customer Relations,P11_Service_Quality_and_Staff_Conduct_Policy_v1.0.pdf
+P12,Privacy and Data Protection Policy,1.0,Active,2,Compliance and Privacy,P12_Privacy_and_Data_Protection_Policy_v1.0.docx
+P13,Repeat Contact and SLA Policy,1.0,Active,4,Management Escalations,P13_Repeat_Contact_and_SLA_Policy_v1.0.docx
+P14,Compensation and Goodwill Policy,1.1,Active,2,Management Escalations,P14_Compensation_and_Goodwill_Policy_v1.1.docx
+P15,Escalation Policy,1.0,Active,2,Management Escalations,P15_Escalation_Policy_v1.0.docx
+P16,Order Cancellation Policy,1.0,Active,3,Billing,P16_Order_Cancellation_Policy_v1.0.pdf
+P17,Replacement Policy,1.0,Active,3,Returns and Refunds,P17_Replacement_Policy_v1.0.pdf
+P18,Customer Communication and AI Safety Policy,1.0,Active,2,Compliance and Privacy,P18_Customer_Communication_and_AI_Safety_Policy_v1.0.docx
