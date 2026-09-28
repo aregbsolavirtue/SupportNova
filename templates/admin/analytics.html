@@ -1,0 +1,823 @@
+{% extends "supportnova_base.html" %}
+
+{% block title %}Complaint Analytics — SupportNova{% endblock %}
+
+{% block user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Overview</div>
+    <a href="/admin/dashboard" class="sn-nav-link">
+        <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a href="/admin/complaints" class="sn-nav-link">
+        <i class="fas fa-inbox"></i> Complaints
+    </a>
+    <a href="/admin/analytics" class="sn-nav-link active" aria-current="page">
+        <i class="fas fa-chart-bar"></i> Analytics
+    </a>
+    <a href="/admin/analytics#trends" class="sn-nav-link">
+        <i class="fas fa-arrow-trend-up"></i> Trend Analysis
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Operations</div>
+    <a href="/admin/manual-review" class="sn-nav-link">
+        <i class="fas fa-user-check"></i> Manual Review
+        <span class="sn-nav-badge" style="background: var(--sn-ai-color);">18</span>
+    </a>
+    <a href="/admin/sla" class="sn-nav-link">
+        <i class="fas fa-clock"></i> SLA Monitoring
+    </a>
+    <a href="/admin/search" class="sn-nav-link">
+        <i class="fas fa-search"></i> Search &amp; Filter
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">System</div>
+    <a href="/admin/ai-analysis" class="sn-nav-link">
+        <i class="fas fa-code-branch"></i> AI/Validation Analysis
+    </a>
+    <a href="/admin/reports" class="sn-nav-link">
+        <i class="fas fa-file-chart-column"></i> Reports
+    </a>
+    <a href="/admin/settings" class="sn-nav-link">
+        <i class="fas fa-gear"></i> Settings
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{# BACKEND INTEGRATION: All analytics data from GET /api/analytics/* endpoints — see MOCK_DATA.analytics #}
+
+<!-- ── Page Header ────────────────────────────────────────────── -->
+<div class="sn-page-header">
+    <div>
+        <h1 class="sn-page-title">
+            <i class="fas fa-chart-bar" style="color: var(--sn-accent); margin-right: 0.5rem; font-size: 1.2rem;"></i>
+            Complaint Analytics
+        </h1>
+        <p class="sn-page-subtitle">Detailed breakdown of support operations &mdash; VoltCart</p>
+    </div>
+    <div class="sn-page-actions">
+        <div style="display: flex; align-items: center; gap: var(--sn-sm);">
+            <label for="analytics-date-from" class="sn-form-label" style="margin: 0; white-space: nowrap; font-size: 0.8rem;">From</label>
+            <input type="date" id="analytics-date-from" class="sn-form-control" style="width: 140px; padding: 0.4rem 0.6rem; font-size: 0.8rem;" value="2026-09-01">
+            <label for="analytics-date-to" class="sn-form-label" style="margin: 0; white-space: nowrap; font-size: 0.8rem;">To</label>
+            <input type="date" id="analytics-date-to" class="sn-form-control" style="width: 140px; padding: 0.4rem 0.6rem; font-size: 0.8rem;" value="2026-09-27">
+        </div>
+        <button class="sn-btn sn-btn-primary sn-btn-sm" id="btn-analytics-apply">
+            <i class="fas fa-filter"></i> Apply
+        </button>
+        <button class="sn-btn sn-btn-outline sn-btn-sm" id="btn-export-analytics">
+            <i class="fas fa-download"></i> Export
+        </button>
+    </div>
+</div>
+
+<!-- ── Tabs ───────────────────────────────────────────────────── -->
+<div data-sn-tabs>
+    <div class="sn-tabs" role="tablist" aria-label="Analytics sections">
+        <button class="sn-tab active" data-tab="volume" role="tab" aria-selected="true" aria-controls="tab-volume">
+            <i class="fas fa-chart-line"></i> Volume
+        </button>
+        <button class="sn-tab" data-tab="categories" role="tab" aria-selected="false" aria-controls="tab-categories">
+            <i class="fas fa-tags"></i> Categories
+        </button>
+        <button class="sn-tab" data-tab="departments" role="tab" aria-selected="false" aria-controls="tab-departments">
+            <i class="fas fa-building"></i> Departments
+        </button>
+        <button class="sn-tab" data-tab="priority-sentiment" role="tab" aria-selected="false" aria-controls="tab-priority-sentiment">
+            <i class="fas fa-signal"></i> Priority &amp; Sentiment
+        </button>
+        <button class="sn-tab" data-tab="ai-system" role="tab" aria-selected="false" aria-controls="tab-ai-system">
+            <i class="fas fa-robot"></i> AI System
+        </button>
+    </div>
+
+    <!-- ── Tab 1: Volume ────────────────────────────────────────── -->
+    <div class="sn-tab-content active" data-tab-content="volume" id="tab-volume" role="tabpanel" aria-labelledby="tab-btn-volume">
+
+        <!-- Summary Stats -->
+        <div class="sn-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--sn-lg);">
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-accent);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-accent-light); color: var(--sn-accent);">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="sn-stat-label">Avg Daily Volume</div>
+                <div class="sn-stat-value" id="vol-avg-daily">205</div>
+                <div class="sn-stat-change neutral">complaints/day</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-danger);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-danger-light); color: var(--sn-danger);">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="sn-stat-label">Peak Day</div>
+                <div class="sn-stat-value" id="vol-peak-day" style="color: var(--sn-danger);">244</div>
+                <div class="sn-stat-change neutral" id="vol-peak-label">Sep 26</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-success);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-success-light); color: var(--sn-success);">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="sn-stat-label">Lowest Day</div>
+                <div class="sn-stat-value" id="vol-low-day" style="color: var(--sn-success);">178</div>
+                <div class="sn-stat-change neutral" id="vol-low-label">Sep 21</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-info);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-info-light); color: var(--sn-info);">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="sn-stat-label">7-Day Total</div>
+                <div class="sn-stat-value" id="vol-7day-total">1,440</div>
+                <div class="sn-stat-change positive"><i class="fas fa-arrow-up"></i> +8% vs prior week</div>
+            </div>
+        </div>
+
+        <!-- Large Line Chart -->
+        <div class="sn-chart-card" style="margin-bottom: var(--sn-lg);">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-chart-line" style="color: var(--sn-accent);"></i>
+                    7-Day Complaint Volume Trend
+                </h2>
+                <span class="sn-text-xs sn-text-muted">
+                    {# BACKEND INTEGRATION: GET /api/analytics/trends #}
+                    Sep 21 – Sep 27, 2026
+                </span>
+            </div>
+            <div class="sn-chart-body" style="flex-direction: column; align-items: stretch; padding: var(--sn-lg); min-height: 220px;">
+                <div id="chart-volume-large" style="width: 100%;"></div>
+                <div style="display: flex; gap: var(--sn-lg); margin-top: var(--sn-sm); justify-content: center; flex-wrap: wrap;">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--sn-text-muted);">
+                        <span style="width:20px;height:3px;background:#4F7FFF;border-radius:2px;display:inline-block;"></span> Total Complaints
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--sn-text-muted);">
+                        <span style="width:20px;height:3px;background:#10B981;border-radius:2px;display:inline-block;"></span> Resolved
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--sn-text-muted);">
+                        <span style="width:20px;height:3px;background:#EF4444;border-radius:2px;display:inline-block;"></span> Escalated
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Breakdown Table -->
+        <div class="sn-card">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-table" style="color: var(--sn-accent);"></i>
+                    Daily Breakdown
+                </h2>
+            </div>
+            <div class="sn-table-wrap">
+                <table class="sn-table" aria-label="Daily complaint volume breakdown">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Resolved</th>
+                            <th>Escalated</th>
+                            <th>Resolution Rate</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="volume-table-body">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tab 2: Categories ─────────────────────────────────────── -->
+    <div class="sn-tab-content" data-tab-content="categories" id="tab-categories" role="tabpanel">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sn-lg); margin-bottom: var(--sn-lg);">
+            <!-- Large Category Bar Chart -->
+            <div class="sn-chart-card">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title">
+                        <i class="fas fa-chart-bar" style="color: var(--sn-accent);"></i>
+                        Complaints by Category
+                    </h2>
+                </div>
+                <div class="sn-chart-body" style="flex-direction:column;align-items:stretch;padding:var(--sn-lg);min-height:220px;">
+                    {# BACKEND INTEGRATION: GET /api/analytics/categories #}
+                    <div id="chart-categories-bar" style="width:100%;"></div>
+                </div>
+            </div>
+
+            <!-- Category Donut -->
+            <div class="sn-chart-card">
+                <div class="sn-card-header">
+                    <h2 class="sn-card-title">
+                        <i class="fas fa-chart-pie" style="color: var(--sn-accent);"></i>
+                        Category Share
+                    </h2>
+                </div>
+                <div class="sn-chart-body" style="min-height:220px;">
+                    <div id="chart-categories-donut" style="width:100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Table with Trend Indicators -->
+        <div class="sn-card">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-table" style="color: var(--sn-accent);"></i>
+                    Category Breakdown
+                </h2>
+            </div>
+            <div class="sn-table-wrap">
+                <table class="sn-table" aria-label="Complaint category breakdown">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Total Complaints</th>
+                            <th>Share (%)</th>
+                            <th>Open</th>
+                            <th>Resolved</th>
+                            <th>Escalated</th>
+                            <th>Trend (7d)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tab 3: Departments ───────────────────────────────────── -->
+    <div class="sn-tab-content" data-tab-content="departments" id="tab-departments" role="tabpanel">
+
+        <!-- Summary mini stats -->
+        <div class="sn-stats-grid" style="margin-bottom: var(--sn-lg);">
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background:var(--sn-accent);"></div>
+                <div class="sn-stat-label">Departments Active</div>
+                <div class="sn-stat-value">5</div>
+                <div class="sn-stat-change neutral">Processing complaints</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background:var(--sn-success);"></div>
+                <div class="sn-stat-label">Best Avg Resolution</div>
+                <div class="sn-stat-value" style="color:var(--sn-success);">14.2h</div>
+                <div class="sn-stat-change neutral">Logistics dept.</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background:var(--sn-warning);"></div>
+                <div class="sn-stat-label">SLA At Risk</div>
+                <div class="sn-stat-value" style="color:var(--sn-warning);">3</div>
+                <div class="sn-stat-change negative">Departments flagged</div>
+            </div>
+        </div>
+
+        <!-- Department Performance Table -->
+        <div class="sn-card">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-building" style="color: var(--sn-rule-color);"></i>
+                    Department Performance
+                </h2>
+                <span class="sn-text-xs sn-text-muted">
+                    {# BACKEND INTEGRATION: GET /api/analytics/departments #}
+                    Last 30 days
+                </span>
+            </div>
+            <div class="sn-table-wrap">
+                <table class="sn-table" aria-label="Department performance table">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Total Complaints</th>
+                            <th>Open</th>
+                            <th>Resolved</th>
+                            <th>Escalated</th>
+                            <th>Avg Resolution Time</th>
+                            <th>SLA Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="department-table-body">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Department Chart -->
+        <div class="sn-chart-card" style="margin-top: var(--sn-lg);">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-chart-bar" style="color: var(--sn-rule-color);"></i>
+                    Volume by Department
+                </h2>
+            </div>
+            <div class="sn-chart-body" style="flex-direction:column;align-items:stretch;padding:var(--sn-lg);min-height:180px;">
+                <div id="chart-departments-bar" style="width:100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tab 4: Priority & Sentiment ─────────────────────────── -->
+    <div class="sn-tab-content" data-tab-content="priority-sentiment" id="tab-priority-sentiment" role="tabpanel">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sn-lg); margin-bottom: var(--sn-lg);">
+
+            <!-- Priority Donut -->
+            <div>
+                <div class="sn-chart-card" style="margin-bottom: var(--sn-md);">
+                    <div class="sn-card-header">
+                        <h2 class="sn-card-title">
+                            <i class="fas fa-signal" style="color: var(--sn-warning);"></i>
+                            Priority Distribution
+                        </h2>
+                    </div>
+                    <div class="sn-chart-body" style="min-height:200px;">
+                        {# BACKEND INTEGRATION: GET /api/analytics/priority #}
+                        <div id="chart-priority-donut" style="width:100%;"></div>
+                    </div>
+                </div>
+                <!-- Priority Table -->
+                <div class="sn-card">
+                    <div class="sn-card-header">
+                        <h2 class="sn-card-title"><i class="fas fa-table"></i> Priority Breakdown</h2>
+                    </div>
+                    <div class="sn-table-wrap">
+                        <table class="sn-table" aria-label="Priority breakdown">
+                            <thead>
+                                <tr><th>Priority</th><th>Count</th><th>Share</th><th>Change (7d)</th></tr>
+                            </thead>
+                            <tbody id="priority-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentiment Donut -->
+            <div>
+                <div class="sn-chart-card" style="margin-bottom: var(--sn-md);">
+                    <div class="sn-card-header">
+                        <h2 class="sn-card-title">
+                            <i class="fas fa-face-smile" style="color: var(--sn-success);"></i>
+                            Sentiment Distribution
+                        </h2>
+                    </div>
+                    <div class="sn-chart-body" style="min-height:200px;">
+                        {# BACKEND INTEGRATION: GET /api/analytics/sentiment #}
+                        <div id="chart-sentiment-donut" style="width:100%;"></div>
+                    </div>
+                </div>
+                <!-- Sentiment Table -->
+                <div class="sn-card">
+                    <div class="sn-card-header">
+                        <h2 class="sn-card-title"><i class="fas fa-table"></i> Sentiment Breakdown</h2>
+                    </div>
+                    <div class="sn-table-wrap">
+                        <table class="sn-table" aria-label="Sentiment breakdown">
+                            <thead>
+                                <tr><th>Sentiment</th><th>Count</th><th>Share</th><th>Change (7d)</th></tr>
+                            </thead>
+                            <tbody id="sentiment-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tab 5: AI System ─────────────────────────────────────── -->
+    <div class="sn-tab-content" data-tab-content="ai-system" id="tab-ai-system" role="tabpanel">
+        {# BACKEND INTEGRATION: GET /api/analytics/ai-performance #}
+
+        <!-- AI vs Rule Engine Top Stats -->
+        <div class="sn-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--sn-lg);">
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-ai-color);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-ai-light); color: var(--sn-ai-color);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="sn-stat-label">Total Analyzed</div>
+                <div class="sn-stat-value" style="color: var(--sn-ai-color);" id="ai-tab-total">1,240</div>
+                <div class="sn-stat-change neutral">by AI engine</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-success);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-success-light); color: var(--sn-success);">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <div class="sn-stat-label">Verification Rate</div>
+                <div class="sn-stat-value" style="color: var(--sn-success);" id="ai-tab-rate">87.3%</div>
+                <div class="sn-stat-change positive"><i class="fas fa-arrow-up"></i> +1.2% this week</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-warning);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-warning-light); color: var(--sn-warning);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="sn-stat-label">Partial Matches</div>
+                <div class="sn-stat-value" style="color: var(--sn-warning);" id="ai-tab-partial">116</div>
+                <div class="sn-stat-change neutral">9.4% of total</div>
+            </div>
+            <div class="sn-stat-card">
+                <div class="sn-stat-card-accent" style="background: var(--sn-danger);"></div>
+                <div class="sn-stat-icon" style="background: var(--sn-danger-light); color: var(--sn-danger);">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="sn-stat-label">Manual Review</div>
+                <div class="sn-stat-value" style="color: var(--sn-danger);" id="ai-tab-manual">42</div>
+                <div class="sn-stat-change negative">3.4% rate</div>
+            </div>
+        </div>
+
+        <!-- AI Performance Comparison Table -->
+        <div class="sn-card sn-ai-card" style="margin-bottom: var(--sn-lg);">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-code-branch" style="color: var(--sn-ai-color);"></i>
+                    AI vs Rule Engine — Comparison Breakdown
+                </h2>
+            </div>
+            <div class="sn-table-wrap">
+                <table class="sn-comparison-table" aria-label="AI vs Rule Engine comparison">
+                    <thead>
+                        <tr>
+                            <th>Field / Decision</th>
+                            <th class="col-ai"><i class="fas fa-robot"></i> AI Engine</th>
+                            <th class="col-rule"><i class="fas fa-code"></i> Rule Engine (Python)</th>
+                            <th>Match</th>
+                            <th>Count</th>
+                            <th>Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ai-comparison-table-body">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="sn-card-footer">
+                <span class="sn-text-xs sn-text-muted">
+                    {# BACKEND INTEGRATION: GET /api/analytics/ai-performance #}
+                    Comparison data from validation engine. Last updated: Sep 27, 2026 06:30
+                </span>
+            </div>
+        </div>
+
+        <!-- Manual Review Rate Trend -->
+        <div class="sn-chart-card" style="margin-bottom: var(--sn-lg);">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-chart-line" style="color: var(--sn-ai-color);"></i>
+                    Manual Review Rate — 7-Day Trend
+                </h2>
+                <span class="sn-badge sn-badge-warning">
+                    <i class="fas fa-arrow-trend-up"></i> +0.2pp this week
+                </span>
+            </div>
+            <div class="sn-chart-body" style="flex-direction:column;align-items:stretch;padding:var(--sn-lg);min-height:160px;">
+                {# BACKEND INTEGRATION: GET /api/analytics/ai-performance — manual review rate trend #}
+                <div id="chart-manual-review-trend" style="width:100%;"></div>
+            </div>
+        </div>
+
+        <!-- AI Verification Progress -->
+        <div class="sn-card">
+            <div class="sn-card-header">
+                <h2 class="sn-card-title">
+                    <i class="fas fa-shield-check" style="color: var(--sn-success);"></i>
+                    Verification Status Breakdown
+                </h2>
+            </div>
+            <div class="sn-card-body">
+                <div id="ai-verification-breakdown" style="display:flex;flex-direction:column;gap:var(--sn-md);"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- end data-sn-tabs -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
+    // ── Shared category colors ────────────────────────────────────
+    var catColors = ['#4F7FFF','#10B981','#F59E0B','#EF4444','#7C3AED','#0891B2','#F97316'];
+
+    // ── Helper: render bar chart with larger height ───────────────
+    function renderLargeBarChart(id, data, options) {
+        var container = document.getElementById(id);
+        if (!container) return;
+        options = options || {};
+        var max = Math.max.apply(null, data.map(function(d){ return d.count || d.value || 0; }));
+        var barColor = options.color || '#4F7FFF';
+        var html = '<div style="display:flex;align-items:flex-end;gap:8px;height:200px;width:100%;padding:0 4px;">';
+        data.forEach(function(d, i) {
+            var val = d.count || d.value || 0;
+            var pct = max > 0 ? Math.round((val / max) * 100) : 0;
+            html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;">' +
+                    '<span style="font-size:0.65rem;color:#6B7280;font-weight:700;">' + val + '</span>' +
+                    '<div style="width:100%;background:' + (d.color || catColors[i % catColors.length] || barColor) + ';border-radius:4px 4px 0 0;height:' + pct + '%;min-height:4px;transition:height 0.5s ease;"></div>' +
+                    '<span style="font-size:0.58rem;color:#6B7280;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + d.label + '</span>' +
+                    '</div>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // ── Tab 1: Volume ─────────────────────────────────────────────
+    function initVolumeTab() {
+        // BACKEND INTEGRATION: GET /api/analytics/trends
+        var trends = MOCK_DATA.analytics.trends;
+        SN.renderLineChart('chart-volume-large', trends);
+
+        // Summary stats
+        var totals = trends.map(function(d){ return d.total; });
+        var max = Math.max.apply(null, totals), min = Math.min.apply(null, totals);
+        var maxDay = trends.find(function(d){ return d.total === max; });
+        var minDay = trends.find(function(d){ return d.total === min; });
+        var avg = Math.round(totals.reduce(function(a,b){return a+b;},0) / totals.length);
+        var total7 = totals.reduce(function(a,b){return a+b;},0);
+
+        var el = function(id){ return document.getElementById(id); };
+        if (el('vol-avg-daily'))  el('vol-avg-daily').textContent  = avg;
+        if (el('vol-peak-day'))   el('vol-peak-day').textContent   = max;
+        if (el('vol-peak-label')) el('vol-peak-label').textContent = maxDay ? maxDay.period : '';
+        if (el('vol-low-day'))    el('vol-low-day').textContent    = min;
+        if (el('vol-low-label'))  el('vol-low-label').textContent  = minDay ? minDay.period : '';
+        if (el('vol-7day-total')) el('vol-7day-total').textContent = total7.toLocaleString();
+
+        // Volume table
+        var tbody = document.getElementById('volume-table-body');
+        if (tbody) {
+            var rows = '';
+            trends.forEach(function(d, i) {
+                var resRate = d.total > 0 ? Math.round((d.resolved / d.total) * 100) : 0;
+                var prevTotal = i > 0 ? trends[i-1].total : d.total;
+                var diff = d.total - prevTotal;
+                var trendIcon = diff > 0
+                    ? '<span style="color:var(--sn-danger);font-size:0.8rem;"><i class="fas fa-arrow-up"></i> +' + diff + '</span>'
+                    : diff < 0
+                        ? '<span style="color:var(--sn-success);font-size:0.8rem;"><i class="fas fa-arrow-down"></i> ' + diff + '</span>'
+                        : '<span style="color:var(--sn-text-muted);font-size:0.8rem;"><i class="fas fa-minus"></i></span>';
+                rows += '<tr>' +
+                        '<td style="font-weight:600;">' + d.period + '</td>' +
+                        '<td>' + d.total + '</td>' +
+                        '<td><span style="color:var(--sn-success);">' + d.resolved + '</span></td>' +
+                        '<td><span style="color:var(--sn-danger);">' + d.escalated + '</span></td>' +
+                        '<td>' +
+                            '<div style="display:flex;align-items:center;gap:6px;">' +
+                            '<div style="flex:1;height:6px;background:var(--sn-border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + resRate + '%;background:var(--sn-success);border-radius:3px;"></div></div>' +
+                            '<span style="font-size:0.75rem;font-weight:600;">' + resRate + '%</span>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td>' + trendIcon + '</td>' +
+                        '</tr>';
+            });
+            tbody.innerHTML = rows;
+        }
+    }
+
+    // ── Tab 2: Categories ─────────────────────────────────────────
+    function initCategoriesTab() {
+        // BACKEND INTEGRATION: GET /api/analytics/categories
+        var cats = MOCK_DATA.analytics.byCategory;
+        var total = cats.reduce(function(a,d){ return a + d.count; }, 0);
+        var catsWithColors = cats.map(function(d,i){ return Object.assign({}, d, { color: catColors[i % catColors.length] }); });
+
+        renderLargeBarChart('chart-categories-bar', catsWithColors);
+        SN.renderDonutChart('chart-categories-donut', catsWithColors);
+
+        var tbody = document.getElementById('category-table-body');
+        if (tbody) {
+            var rows = '';
+            var trendChanges = ['+28%','+19%','+5%','-3%','+11%','-2%','+7%'];
+            cats.forEach(function(d, i) {
+                var open = Math.round(d.count * 0.3);
+                var resolved = d.count - open;
+                var escalated = Math.round(d.count * 0.05);
+                var tc = trendChanges[i] || '—';
+                var isUp = tc.startsWith('+');
+                rows += '<tr>' +
+                        '<td><span style="display:flex;align-items:center;gap:6px;">' +
+                            '<span style="width:10px;height:10px;border-radius:50%;background:' + catColors[i % catColors.length] + ';display:inline-block;"></span>' +
+                            '<strong>' + d.label + '</strong></span></td>' +
+                        '<td><strong>' + d.count.toLocaleString() + '</strong></td>' +
+                        '<td>' + d.pct + '%</td>' +
+                        '<td style="color:var(--sn-info);">' + open + '</td>' +
+                        '<td style="color:var(--sn-success);">' + resolved + '</td>' +
+                        '<td style="color:var(--sn-danger);">' + escalated + '</td>' +
+                        '<td><span style="color:' + (isUp ? 'var(--sn-danger)' : 'var(--sn-success)') + ';font-weight:700;">' +
+                            '<i class="fas ' + (isUp ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down') + '"></i> ' + tc + '</span></td>' +
+                        '</tr>';
+            });
+            tbody.innerHTML = rows;
+        }
+    }
+
+    // ── Tab 3: Departments ────────────────────────────────────────
+    function initDepartmentsTab() {
+        // BACKEND INTEGRATION: GET /api/analytics/departments
+        var depts = MOCK_DATA.analytics.byDepartment;
+        var deptColors = ['#4F7FFF','#10B981','#F59E0B','#7C3AED','#0891B2'];
+        var avgTimes = ['16.2h','14.2h','22.8h','18.5h','19.3h'];
+        var slaStatus = ['On Track','On Track','At Risk','On Track','At Risk'];
+
+        renderLargeBarChart('chart-departments-bar', depts.map(function(d,i){
+            return { label: d.label, count: d.count, color: deptColors[i % deptColors.length] };
+        }));
+
+        var tbody = document.getElementById('department-table-body');
+        if (tbody) {
+            var rows = '';
+            depts.forEach(function(d, i) {
+                var open = Math.round(d.count * 0.28);
+                var resolved = d.count - open;
+                var escalated = Math.round(d.count * 0.04);
+                var sla = slaStatus[i] || 'On Track';
+                var slaClass = sla === 'On Track' ? 'color:var(--sn-success);' : 'color:var(--sn-warning);';
+                var slaIcon  = sla === 'On Track' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+                rows += '<tr>' +
+                        '<td><span style="display:flex;align-items:center;gap:6px;">' +
+                            '<span style="width:10px;height:10px;border-radius:50%;background:' + deptColors[i % deptColors.length] + ';display:inline-block;"></span>' +
+                            '<strong>' + d.label + '</strong></span></td>' +
+                        '<td><strong>' + d.count.toLocaleString() + '</strong></td>' +
+                        '<td style="color:var(--sn-info);">' + open + '</td>' +
+                        '<td style="color:var(--sn-success);">' + resolved + '</td>' +
+                        '<td style="color:var(--sn-danger);">' + escalated + '</td>' +
+                        '<td>' + (avgTimes[i] || '—') + '</td>' +
+                        '<td><span style="' + slaClass + 'font-weight:600;font-size:0.8rem;">' +
+                            '<i class="fas ' + slaIcon + '"></i> ' + sla + '</span></td>' +
+                        '</tr>';
+            });
+            tbody.innerHTML = rows;
+        }
+    }
+
+    // ── Tab 4: Priority & Sentiment ───────────────────────────────
+    function initPriorityTab() {
+        // BACKEND INTEGRATION: GET /api/analytics/priority + /api/analytics/sentiment
+        var priorities = MOCK_DATA.analytics.byPriority;
+        var sentiments = MOCK_DATA.analytics.bySentiment;
+        var totalP = priorities.reduce(function(a,d){ return a+d.count; },0);
+        var totalS = sentiments.reduce(function(a,d){ return a+d.count; },0);
+
+        SN.renderDonutChart('chart-priority-donut', priorities);
+        SN.renderDonutChart('chart-sentiment-donut', sentiments);
+
+        // Priority table
+        var pbody = document.getElementById('priority-table-body');
+        if (pbody) {
+            var pChanges = ['+2%','-5%','+8%','-1%'];
+            var rows = '';
+            priorities.forEach(function(d, i) {
+                var pct = totalP > 0 ? Math.round((d.count / totalP) * 100) : 0;
+                var ch = pChanges[i] || '—';
+                rows += '<tr>' +
+                        '<td>' + SN.priorityBadge(d.label) + '</td>' +
+                        '<td><strong>' + d.count.toLocaleString() + '</strong></td>' +
+                        '<td>' + pct + '%</td>' +
+                        '<td><span style="color:' + (ch.startsWith('+') ? 'var(--sn-danger)' : 'var(--sn-success)') + ';font-weight:700;">' + ch + '</span></td>' +
+                        '</tr>';
+            });
+            pbody.innerHTML = rows;
+        }
+
+        // Sentiment table
+        var sbody = document.getElementById('sentiment-table-body');
+        if (sbody) {
+            var sChanges = ['+3%','+5%','-2%','-4%'];
+            var rows2 = '';
+            sentiments.forEach(function(d, i) {
+                var pct = totalS > 0 ? Math.round((d.count / totalS) * 100) : 0;
+                var ch = sChanges[i] || '—';
+                rows2 += '<tr>' +
+                         '<td>' + SN.sentimentBadge(d.label) + '</td>' +
+                         '<td><strong>' + d.count.toLocaleString() + '</strong></td>' +
+                         '<td>' + pct + '%</td>' +
+                         '<td><span style="color:' + (ch.startsWith('+') ? 'var(--sn-danger)' : 'var(--sn-success)') + ';font-weight:700;">' + ch + '</span></td>' +
+                         '</tr>';
+            });
+            sbody.innerHTML = rows2;
+        }
+    }
+
+    // ── Tab 5: AI System ──────────────────────────────────────────
+    function initAITab() {
+        // BACKEND INTEGRATION: GET /api/analytics/ai-performance
+        var ai = MOCK_DATA.analytics.aiComparison;
+
+        var el = function(id){ return document.getElementById(id); };
+        if (el('ai-tab-total'))   el('ai-tab-total').textContent   = ai.totalAnalyzed.toLocaleString();
+        if (el('ai-tab-rate'))    el('ai-tab-rate').textContent    = ai.verificationRate + '%';
+        if (el('ai-tab-partial')) el('ai-tab-partial').textContent = ai.partialMatch.toLocaleString();
+        if (el('ai-tab-manual')) el('ai-tab-manual').textContent   = ai.manualReview.toLocaleString();
+
+        // Comparison table
+        var tbody = document.getElementById('ai-comparison-table-body');
+        if (tbody) {
+            var comparisons = [
+                { field: 'Category Classification',   aiRate: '94.2%', ruleRate: '96.1%', match: true,  count: 1168, rate: '94.2%' },
+                { field: 'Department Assignment',      aiRate: '91.8%', ruleRate: '93.4%', match: true,  count: 1138, rate: '91.8%' },
+                { field: 'Priority Assessment',        aiRate: '89.5%', ruleRate: '88.1%', match: false, count: 1110, rate: '89.5%' },
+                { field: 'Sentiment Classification',   aiRate: '96.3%', ruleRate: '94.7%', match: false, count: 1194, rate: '96.3%' },
+                { field: 'Escalation Trigger',         aiRate: '85.2%', ruleRate: '91.2%', match: false, count: 1056, rate: '85.2%' },
+                { field: 'Response Tone Compliance',   aiRate: '92.1%', ruleRate: '90.5%', match: false, count: 1142, rate: '92.1%' },
+            ];
+            var rows = '';
+            comparisons.forEach(function(c) {
+                rows += '<tr>' +
+                        '<td class="sn-cmp-field">' + c.field + '</td>' +
+                        '<td class="sn-cmp-ai">' + c.aiRate + '</td>' +
+                        '<td class="sn-cmp-rule">' + c.ruleRate + '</td>' +
+                        '<td>' + (c.match
+                            ? '<span class="sn-cmp-match"><i class="fas fa-check-circle"></i> Match</span>'
+                            : '<span class="sn-cmp-mismatch"><i class="fas fa-times-circle"></i> Diff</span>') + '</td>' +
+                        '<td>' + c.count.toLocaleString() + '</td>' +
+                        '<td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:var(--sn-border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + c.rate + ';background:var(--sn-accent);border-radius:3px;"></div></div><span style="font-size:0.72rem;font-weight:700;">' + c.rate + '</span></div></td>' +
+                        '</tr>';
+            });
+            tbody.innerHTML = rows;
+        }
+
+        // Manual review trend chart (use trend data mapped to review rates)
+        var reviewRateData = MOCK_DATA.analytics.trends.map(function(d) {
+            return { period: d.period, total: d.escalated };
+        });
+        SN.renderLineChart('chart-manual-review-trend', reviewRateData);
+
+        // Verification breakdown
+        var breakdown = document.getElementById('ai-verification-breakdown');
+        if (breakdown) {
+            var items = [
+                { label: 'Fully Verified', count: ai.fullyVerified, total: ai.totalAnalyzed, color: 'var(--sn-success)' },
+                { label: 'Partial Match',  count: ai.partialMatch,  total: ai.totalAnalyzed, color: 'var(--sn-warning)' },
+                { label: 'Manual Review',  count: ai.manualReview,  total: ai.totalAnalyzed, color: 'var(--sn-ai-color)' },
+            ];
+            var html = '';
+            items.forEach(function(item) {
+                var pct = item.total > 0 ? ((item.count / item.total) * 100).toFixed(1) : 0;
+                html += '<div>' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                            '<span style="font-size:0.875rem;font-weight:600;color:var(--sn-text);">' + item.label + '</span>' +
+                            '<span style="font-size:0.875rem;font-weight:700;color:' + item.color + ';">' + item.count.toLocaleString() + ' (' + pct + '%)</span>' +
+                        '</div>' +
+                        '<div style="height:8px;background:var(--sn-border);border-radius:4px;overflow:hidden;">' +
+                            '<div style="height:100%;width:' + pct + '%;background:' + item.color + ';border-radius:4px;transition:width 0.7s ease;"></div>' +
+                        '</div>' +
+                        '</div>';
+            });
+            breakdown.innerHTML = html;
+        }
+    }
+
+    // ── Init first tab on load ────────────────────────────────────
+    initVolumeTab();
+
+    // ── Tab change handlers — lazy init ──────────────────────────
+    var tabInited = { volume: true };
+    document.querySelectorAll('.sn-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var t = tab.dataset.tab;
+            if (tabInited[t]) return;
+            tabInited[t] = true;
+            setTimeout(function() {
+                if (t === 'categories')         initCategoriesTab();
+                else if (t === 'departments')   initDepartmentsTab();
+                else if (t === 'priority-sentiment') initPriorityTab();
+                else if (t === 'ai-system')     initAITab();
+            }, 50);
+        });
+    });
+
+    // ── Apply date range ──────────────────────────────────────────
+    var btnApply = document.getElementById('btn-analytics-apply');
+    if (btnApply) {
+        btnApply.addEventListener('click', function() {
+            var from = document.getElementById('analytics-date-from').value;
+            var to   = document.getElementById('analytics-date-to').value;
+            // BACKEND INTEGRATION: GET /api/analytics?from=...&to=...
+            SN.toast('Date filter will query the backend: ' + from + ' → ' + to, 'info');
+        });
+    }
+
+    var btnExport = document.getElementById('btn-export-analytics');
+    if (btnExport) {
+        btnExport.addEventListener('click', function() {
+            // BACKEND INTEGRATION: POST /api/reports/export/analytics
+            SN.toast('Export will be handled by the backend reporting service.', 'info');
+        });
+    }
+});
+</script>
+{% endblock %}

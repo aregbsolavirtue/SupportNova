@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cart - VoltCart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-page-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
+        margin-bottom: var(--spacing-section);
+    }
+    @media (max-width: 992px) {
+        .cart-page-layout { grid-template-columns: 1fr; }
+    }
+
+    .cart-items-wrapper {
+        background: var(--color-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: var(--spacing-lg);
+    }
+    .cart-page-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-md) 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .cart-page-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .cart-page-item-img {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        background: #f8f8f8;
+    }
+    .cart-page-item-info {
+        flex: 1;
+    }
+    .cart-page-item-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-navy);
+        margin-bottom: var(--spacing-xs);
+    }
+    .cart-page-item-price {
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    .cart-page-item-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+    }
+    @media (max-width: 576px) {
+        .cart-page-item { flex-direction: column; align-items: flex-start; }
+        .cart-page-item-actions { width: 100%; justify-content: space-between; margin-top: var(--spacing-sm); }
+    }
+
+    .order-summary {
+        background: var(--color-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: var(--spacing-lg);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-sm);
+        color: var(--color-text-main);
+    }
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 2px solid var(--color-border);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--color-navy);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="margin-top: var(--spacing-xl);">Shopping Cart</h1>
+    
+    <div class="cart-page-layout">
+        <div class="cart-items-wrapper" id="full-cart-items">
+            <!-- Rendered via JS -->
+        </div>
+        
+        <div class="order-summary" id="cart-summary-card" style="display: none;">
+            <h3>Order Summary</h3>
+            <div style="margin-top: var(--spacing-md);">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal">$0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery (Estimated)</span>
+                    <span>$5.99</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span id="summary-total">$0</span>
+                </div>
+                
+                <a href="/checkout.html" class="btn btn-primary btn-block mt-lg" style="height: 50px; font-size: 1.125rem;">
+                    Proceed to Checkout
+                </a>
+                
+                <div style="text-align: center; margin-top: var(--spacing-md);">
+                    <i class="fas fa-shield-alt text-spark" style="background: var(--color-navy); border-radius:50%; padding:4px;"></i>
+                    <span class="text-muted" style="font-size: 0.875rem;">Secure encrypted checkout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('full-cart-items');
+        const summaryCard = document.getElementById('cart-summary-card');
+        
+        function renderFullCart() {
+            if (!window.cart) return;
+            
+            const items = window.cart.items;
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="box-shadow:none;">
+                        <i class="fas fa-shopping-cart icon"></i>
+                        <h3>Your cart is empty</h3>
+                        <p>You haven't added any items to your cart yet.</p>
+                        <a href="/shop.html" class="btn btn-primary">Start Shopping</a>
+                    </div>
+                `;
+                summaryCard.style.display = 'none';
+            } else {
+                container.innerHTML = items.map(item => `
+                    <div class="cart-page-item">
+                        <img src="${item.image}" alt="${item.name}" class="cart-page-item-img">
+                        <div class="cart-page-item-info">
+                            <div class="cart-page-item-title">${item.name}</div>
+                            <div class="cart-page-item-price">${window.formatCurrency(item.price)}</div>
+                        </div>
+                        <div class="cart-page-item-actions">
+                            <div class="quantity-selector">
+                                <button onclick="window.cart.updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                                <input type="text" value="${item.quantity}" readonly>
+                                <button onclick="window.cart.updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            </div>
+                            <button class="btn btn-icon" style="color: var(--color-coral);" onclick="window.cart.removeItem(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                summaryCard.style.display = 'block';
+                const subtotal = window.cart.getSubtotal();
+                document.getElementById('summary-subtotal').textContent = window.formatCurrency(subtotal);
+                document.getElementById('summary-total').textContent = window.formatCurrency(subtotal + 5.99);
+            }
+        }
+        
+        // Initial render
+        renderFullCart();
+        
+        // Listen for cart updates
+        window.addEventListener('cartUpdated', renderFullCart);
+    });
+</script>
+{% endblock %}

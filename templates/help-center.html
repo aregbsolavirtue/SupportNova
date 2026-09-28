@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Help Center - VoltCart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .help-header {
+        background: var(--color-navy);
+        color: var(--color-white);
+        padding: calc(var(--spacing-section) * 1.5) 0 var(--spacing-section);
+        text-align: center;
+    }
+    .help-search-box {
+        max-width: 600px;
+        margin: var(--spacing-lg) auto 0;
+        position: relative;
+    }
+    .help-search-box input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        font-size: 1.125rem;
+        border-radius: var(--radius-pill);
+        border: none;
+    }
+    .help-search-box i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-muted);
+        font-size: 1.25rem;
+    }
+
+    .topic-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+        margin-top: -3rem; /* Overlap header */
+        position: relative;
+        z-index: 10;
+        margin-bottom: var(--spacing-section);
+    }
+    @media (max-width: 768px) {
+        .topic-grid { grid-template-columns: 1fr; margin-top: var(--spacing-lg); }
+    }
+    .topic-card {
+        background: var(--color-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        transition: transform var(--transition-fast);
+        cursor: pointer;
+    }
+    .topic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    .topic-card i {
+        font-size: 2.5rem;
+        color: var(--color-spark);
+        margin-bottom: var(--spacing-md);
+        background: var(--color-navy);
+        width: 80px; height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        margin-left: auto; margin-right: auto;
+    }
+
+    .faq-section {
+        max-width: 800px;
+        margin: 0 auto var(--spacing-section);
+    }
+    .faq-item {
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-sm);
+        overflow: hidden;
+    }
+    .faq-q {
+        padding: var(--spacing-md);
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        background: var(--color-white);
+        color: var(--color-navy);
+    }
+    .faq-q:hover { background: var(--color-surface-hover); }
+    .faq-a {
+        padding: 0 var(--spacing-md) var(--spacing-md);
+        color: var(--color-text-main);
+        display: none;
+    }
+    .faq-item.active .faq-a { display: block; }
+    .faq-item.active .faq-q i { transform: rotate(180deg); }
+
+    .supportnova-cta {
+        background: linear-gradient(135deg, var(--color-navy) 0%, #2A3E6B 100%);
+        color: var(--color-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        text-align: center;
+        margin-bottom: var(--spacing-section);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help-header">
+    <div class="container">
+        <h1>How can we help?</h1>
+        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.8);">Search our knowledge base or get in touch with SupportNova.</p>
+        <div class="help-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search for articles, tracking, returns...">
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="topic-grid">
+        <div class="topic-card">
+            <i class="fas fa-box"></i>
+            <h3>Orders & Delivery</h3>
+            <p class="text-muted">Track your order, shipping policies, and delivery timelines.</p>
+        </div>
+        <div class="topic-card">
+            <i class="fas fa-undo"></i>
+            <h3>Returns & Refunds</h3>
+            <p class="text-muted">How to return an item and get a refund or replacement.</p>
+        </div>
+        <div class="topic-card">
+            <i class="fas fa-credit-card"></i>
+            <h3>Payments</h3>
+            <p class="text-muted">Payment methods, billing issues, and promo codes.</p>
+        </div>
+    </div>
+
+    <div class="faq-section" id="returns">
+        <h2 class="text-center" style="margin-bottom: var(--spacing-lg);">Frequently Asked Questions</h2>
+        
+        <div class="faq-item">
+            <div class="faq-q">How long does delivery take? <i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">Standard delivery takes 2-4 business days. Express delivery is available for next-day delivery in select cities.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">What is your return policy? <i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">We accept returns within 30 days of delivery. The item must be unused, in its original packaging, and accompanied by the receipt.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Are my payments secure? <i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">Yes, all payments are processed securely. We use industry-standard encryption to protect your personal and payment information.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Do your products have a warranty? <i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">All VoltCart branded electronics come with a 12-month manufacturer's warranty covering defects in materials and workmanship.</div>
+        </div>
+    </div>
+
+    <div class="supportnova-cta">
+        <h2 style="color: var(--color-white); margin-bottom: var(--spacing-sm);">Can't find what you're looking for?</h2>
+        <p style="font-size: 1.125rem; max-width: 600px; margin: 0 auto var(--spacing-lg); color: rgba(255,255,255,0.8);">
+            Tell us what happened and our intelligent support system will help route your issue immediately.
+        </p>
+        <a href="/complaint.html" class="btn" style="background: var(--color-spark); color: var(--color-navy); font-size: 1.125rem; padding: 1rem 2rem;">
+            Submit a Complaint
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.faq-q').forEach(q => {
+        q.addEventListener('click', () => {
+            const item = q.parentElement;
+            item.classList.toggle('active');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Product Details - VoltCart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xxl);
+        margin-top: var(--spacing-xl);
+        margin-bottom: var(--spacing-section);
+    }
+    @media (max-width: 768px) {
+        .product-layout { grid-template-columns: 1fr; gap: var(--spacing-lg); }
+    }
+
+    .product-gallery {
+        position: relative;
+    }
+    .main-image {
+        width: 100%;
+        border-radius: var(--radius-lg);
+        background: #f8f8f8;
+        box-shadow: var(--shadow-sm);
+        object-fit: cover;
+        aspect-ratio: 1 / 1;
+    }
+    .product-gallery-thumbs {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+    }
+    .product-thumb {
+        width: 82px;
+        height: 82px;
+        border: 2px solid transparent;
+        background: transparent;
+        border-radius: var(--radius-md);
+        padding: 0;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    .product-thumb.active {
+        border-color: var(--color-navy);
+        box-shadow: 0 0 0 3px rgba(16, 24, 40, 0.08);
+    }
+    .product-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .product-info h1 {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .product-meta {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        color: var(--color-text-muted);
+    }
+    .rating {
+        color: #F59E0B;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    .stock-badge {
+        background: rgba(34, 197, 94, 0.1);
+        color: #166534;
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .product-price {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--color-navy);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+    .old-price {
+        font-size: 1.25rem;
+        color: var(--color-text-muted);
+        text-decoration: line-through;
+        font-weight: normal;
+    }
+    .discount-badge {
+        background: var(--color-coral);
+        color: white;
+        font-size: 1rem;
+        padding: 4px 12px;
+        border-radius: var(--radius-pill);
+    }
+
+    .product-description {
+        margin-bottom: var(--spacing-xl);
+        font-size: 1.125rem;
+        color: var(--color-text-main);
+        line-height: 1.6;
+    }
+
+    .compat-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-xl);
+    }
+    .compat-badge {
+        border: 1px solid var(--color-border);
+        padding: 4px 12px;
+        border-radius: var(--radius-pill);
+        font-size: 0.875rem;
+        color: var(--color-navy);
+        background: var(--color-surface-hover);
+    }
+
+    .action-row {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .btn-buy-now {
+        flex: 1;
+    }
+
+    .features-list {
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-border);
+    }
+    .features-list ul {
+        margin-top: var(--spacing-md);
+    }
+    .features-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+    .features-list i {
+        color: var(--color-spark);
+        margin-top: 4px;
+        background: var(--color-navy);
+        width: 20px; height: 20px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        font-size: 0.6rem;
+    }
+    
+    .related-products {
+        margin-top: var(--spacing-section);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" id="product-container">
+    <!-- Skeleton Loading State -->
+    <div class="product-layout" id="product-loading">
+        <div class="skeleton" style="height: 500px; border-radius: var(--radius-lg);"></div>
+        <div>
+            <div class="skeleton" style="height: 40px; width: 80%; margin-bottom: 20px;"></div>
+            <div class="skeleton" style="height: 20px; width: 40%; margin-bottom: 40px;"></div>
+            <div class="skeleton" style="height: 60px; width: 30%; margin-bottom: 30px;"></div>
+            <div class="skeleton" style="height: 100px; width: 100%; margin-bottom: 40px;"></div>
+            <div class="skeleton" style="height: 50px; width: 100%;"></div>
+        </div>
+    </div>
+    
+    <!-- Content rendered by JS -->
+    <div id="product-content" class="hidden"></div>
+</div>
+
+<div class="container related-products hidden" id="related-container">
+    <h2 style="margin-bottom: var(--spacing-lg);">Related Products</h2>
+    <div class="grid grid-cols-4 gap-md" id="related-grid">
+        <!-- Rendered by JS -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/product.js"></script>
+{% endblock %}
