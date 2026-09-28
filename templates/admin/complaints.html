@@ -1,0 +1,685 @@
+{% extends "supportnova_base.html" %}
+
+{% block title %}Complaint Management — SupportNova{% endblock %}
+
+{% block user_role %}Admin{% endblock %}
+
+{% block sidebar %}
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Overview</div>
+    <a href="/admin/dashboard" class="sn-nav-link">
+        <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a href="/admin/complaints" class="sn-nav-link active" aria-current="page">
+        <i class="fas fa-inbox"></i> Complaints
+    </a>
+    <a href="/admin/analytics" class="sn-nav-link">
+        <i class="fas fa-chart-bar"></i> Analytics
+    </a>
+    <a href="/admin/analytics#trends" class="sn-nav-link">
+        <i class="fas fa-arrow-trend-up"></i> Trend Analysis
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">Operations</div>
+    <a href="/admin/manual-review" class="sn-nav-link">
+        <i class="fas fa-user-check"></i> Manual Review
+        <span class="sn-nav-badge" style="background: var(--sn-ai-color);">18</span>
+    </a>
+    <a href="/admin/sla" class="sn-nav-link">
+        <i class="fas fa-clock"></i> SLA Monitoring
+    </a>
+    <a href="/admin/search" class="sn-nav-link">
+        <i class="fas fa-search"></i> Search &amp; Filter
+    </a>
+</div>
+<div class="sn-sidebar-section">
+    <div class="sn-sidebar-label">System</div>
+    <a href="/admin/ai-analysis" class="sn-nav-link">
+        <i class="fas fa-code-branch"></i> AI/Validation Analysis
+    </a>
+    <a href="/admin/reports" class="sn-nav-link">
+        <i class="fas fa-file-chart-column"></i> Reports
+    </a>
+    <a href="/admin/settings" class="sn-nav-link">
+        <i class="fas fa-gear"></i> Settings
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{# BACKEND INTEGRATION: Complaint list from GET /api/complaints with full filter params #}
+
+<!-- ── Page Header ────────────────────────────────────────────── -->
+<div class="sn-page-header">
+    <div style="display: flex; align-items: center; gap: var(--sn-md);">
+        <div>
+            <h1 class="sn-page-title">
+                <i class="fas fa-inbox" style="color: var(--sn-accent); margin-right: 0.5rem; font-size: 1.2rem;"></i>
+                Complaint Management
+            </h1>
+            <p class="sn-page-subtitle">
+                <span id="complaint-count-label">Showing all complaints</span>
+            </p>
+        </div>
+        <span class="sn-badge" style="background: var(--sn-accent-light); color: var(--sn-accent); font-size: 0.85rem; padding: 0.35rem 0.8rem;" id="total-count-badge">
+            {# BACKEND INTEGRATION: total count from API #}
+            1,284 total
+        </span>
+    </div>
+    <div class="sn-page-actions">
+        <!-- Export Buttons -->
+        <div style="display: flex; gap: var(--sn-xs);" role="group" aria-label="Export options">
+            <button class="sn-btn sn-btn-outline sn-btn-sm export-btn" data-format="csv" aria-label="Export as CSV">
+                <i class="fas fa-file-csv"></i> CSV
+            </button>
+            <button class="sn-btn sn-btn-outline sn-btn-sm export-btn" data-format="pdf" aria-label="Export as PDF">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="sn-btn sn-btn-outline sn-btn-sm export-btn" data-format="xlsx" aria-label="Export as Excel">
+                <i class="fas fa-file-excel"></i> Excel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Filter Bar ─────────────────────────────────────────────── -->
+<div class="sn-card" style="margin-bottom: var(--sn-md); padding: var(--sn-lg);" aria-label="Filter complaints">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: var(--sn-sm); margin-bottom: var(--sn-sm);">
+
+        <!-- Search -->
+        <div class="sn-search-input-wrap" style="grid-column: 1 / 3;">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" id="filter-search" class="sn-search-input"
+                   placeholder="Search by ID, customer name, or order ref…"
+                   aria-label="Search complaints">
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+            <label for="filter-status" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Status</label>
+            <select id="filter-status" class="sn-filter-select" style="width:100%;" aria-label="Filter by status">
+                <option value="">All Statuses</option>
+                <option value="New">New</option>
+                <option value="Analyzed">Analyzed</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Awaiting Customer">Awaiting Customer</option>
+                <option value="Escalated">Escalated</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+                <option value="Reopened">Reopened</option>
+            </select>
+        </div>
+
+        <!-- Category Filter -->
+        <div>
+            <label for="filter-category" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Category</label>
+            <select id="filter-category" class="sn-filter-select" style="width:100%;" aria-label="Filter by category">
+                <option value="">All Categories</option>
+                <option value="Billing">Billing</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Product Quality">Product Quality</option>
+                <option value="Return &amp; Refund">Return &amp; Refund</option>
+                <option value="Wrong Item">Wrong Item</option>
+                <option value="Technical">Technical</option>
+                <option value="Payment">Payment</option>
+                <option value="Shipping">Shipping</option>
+                <option value="Account">Account</option>
+            </select>
+        </div>
+
+        <!-- Department Filter -->
+        <div>
+            <label for="filter-department" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Department</label>
+            <select id="filter-department" class="sn-filter-select" style="width:100%;" aria-label="Filter by department">
+                <option value="">All Departments</option>
+                <option value="Billing">Billing</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Quality Assurance">Quality Assurance</option>
+                <option value="Returns">Returns</option>
+                <option value="Account Management">Account Management</option>
+                <option value="Technical Support">Technical Support</option>
+                <option value="Payments">Payments</option>
+            </select>
+        </div>
+
+        <!-- Priority Filter -->
+        <div>
+            <label for="filter-priority" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Priority</label>
+            <select id="filter-priority" class="sn-filter-select" style="width:100%;" aria-label="Filter by priority">
+                <option value="">All Priorities</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <!-- Sentiment Filter -->
+        <div>
+            <label for="filter-sentiment" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Sentiment</label>
+            <select id="filter-sentiment" class="sn-filter-select" style="width:100%;" aria-label="Filter by sentiment">
+                <option value="">All Sentiments</option>
+                <option value="Positive">Positive</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Negative">Negative</option>
+                <option value="Furious">Furious</option>
+            </select>
+        </div>
+
+        <!-- Date From -->
+        <div>
+            <label for="filter-date-from" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Date From</label>
+            <input type="date" id="filter-date-from" class="sn-form-control" style="padding:0.45rem 0.6rem;font-size:0.8rem;" aria-label="Filter from date">
+        </div>
+
+        <!-- Date To -->
+        <div>
+            <label for="filter-date-to" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Date To</label>
+            <input type="date" id="filter-date-to" class="sn-form-control" style="padding:0.45rem 0.6rem;font-size:0.8rem;" aria-label="Filter to date">
+        </div>
+
+        <!-- Escalation Filter -->
+        <div>
+            <label for="filter-escalation" class="sn-form-label" style="font-size:0.72rem;margin-bottom:3px;">Escalation</label>
+            <select id="filter-escalation" class="sn-filter-select" style="width:100%;" aria-label="Filter by escalation status">
+                <option value="">All</option>
+                <option value="escalated">Escalated Only</option>
+                <option value="not-escalated">Not Escalated</option>
+            </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;align-items:flex-end;gap:var(--sn-xs);grid-column: span 2;">
+            <button class="sn-btn sn-btn-primary sn-btn-sm" id="btn-apply-filters" style="flex:1;" aria-label="Apply filters">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <button class="sn-btn sn-btn-ghost sn-btn-sm" id="btn-clear-filters" aria-label="Clear all filters">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Active Filter Chips ────────────────────────────────────── -->
+<div id="active-filter-chips" style="display:flex;flex-wrap:wrap;gap:var(--sn-xs);margin-bottom:var(--sn-md);min-height:0;" aria-live="polite" aria-label="Active filters">
+    <!-- Chips rendered by JS when filters are applied -->
+</div>
+
+<!-- ── Bulk Actions Bar (appears on selection) ────────────────── -->
+<div id="bulk-actions-bar" style="display:none;" role="toolbar" aria-label="Bulk actions">
+    <div class="sn-card" style="margin-bottom:var(--sn-md);background:var(--sn-primary);padding:var(--sn-sm) var(--sn-lg);">
+        <div style="display:flex;align-items:center;gap:var(--sn-md);flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:var(--sn-sm);color:#fff;font-size:0.875rem;font-weight:600;cursor:pointer;">
+                <input type="checkbox" id="chk-select-all" aria-label="Select all visible complaints" style="width:16px;height:16px;cursor:pointer;">
+                Select All
+            </label>
+            <span id="selected-count-label" style="color:rgba(255,255,255,0.7);font-size:0.8rem;">0 selected</span>
+            <div style="display:flex;gap:var(--sn-xs);margin-left:auto;">
+                <button class="sn-btn sn-btn-sm" id="btn-bulk-reassign"
+                        style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);"
+                        aria-label="Bulk reassign selected">
+                    <i class="fas fa-user-pen"></i> Bulk Reassign
+                </button>
+                <button class="sn-btn sn-btn-sm sn-btn-danger" id="btn-bulk-escalate" aria-label="Bulk escalate selected">
+                    <i class="fas fa-triangle-exclamation"></i> Bulk Escalate
+                </button>
+                <button class="sn-btn sn-btn-sm" id="btn-export-selected"
+                        style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);"
+                        aria-label="Export selected complaints">
+                    <i class="fas fa-download"></i> Export Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Complaints Table ───────────────────────────────────────── -->
+<div class="sn-card">
+    <div class="sn-card-header">
+        <h2 class="sn-card-title">
+            <i class="fas fa-table" style="color: var(--sn-accent);"></i>
+            All Complaints
+        </h2>
+        <div style="display:flex;align-items:center;gap:var(--sn-sm);">
+            <span id="table-result-count" class="sn-text-xs sn-text-muted">—</span>
+            <button class="sn-btn sn-btn-outline sn-btn-sm" id="btn-toggle-bulk" aria-pressed="false" aria-label="Toggle bulk selection mode">
+                <i class="fas fa-check-square"></i> Select
+            </button>
+        </div>
+    </div>
+    <div class="sn-table-wrap">
+        <table class="sn-table sn-table-responsive" id="complaints-table" aria-label="Complaint management table">
+            <thead>
+                <tr>
+                    <th style="width:36px;">
+                        <input type="checkbox" id="chk-header-all" aria-label="Select all" style="display:none;width:16px;height:16px;cursor:pointer;">
+                    </th>
+                    <th>Complaint ID</th>
+                    <th>Customer</th>
+                    <th>Category</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Sentiment</th>
+                    <th>Status</th>
+                    <th>Escalation</th>
+                    <th>AI Validation</th>
+                    <th>Assigned Agent</th>
+                    <th>Submitted</th>
+                    <th>Last Updated</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="complaints-table-body">
+                <!-- Rendered by JS -->
+                <tr>
+                    <td colspan="14" style="text-align:center;padding:var(--sn-xxl);">
+                        <div class="sn-spinner" style="margin:0 auto;"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="sn-card-footer" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sn-md);flex-wrap:wrap;">
+        <div class="sn-text-xs sn-text-muted" id="pagination-info">Showing 1–20 of — results</div>
+        <nav class="sn-pagination" aria-label="Complaint table pagination" id="pagination-controls">
+            <!-- Rendered by JS -->
+        </nav>
+        <div style="display:flex;align-items:center;gap:var(--sn-xs);">
+            <label for="per-page-select" class="sn-text-xs sn-text-muted">Rows:</label>
+            <select id="per-page-select" class="sn-filter-select" style="padding:0.35rem 1.5rem 0.35rem 0.5rem;" aria-label="Rows per page">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- ── Reassign Modal ─────────────────────────────────────────── -->
+<div class="sn-modal-overlay" id="modal-reassign" role="dialog" aria-modal="true" aria-labelledby="modal-reassign-title">
+    <div class="sn-modal">
+        <div class="sn-modal-header">
+            <h2 class="sn-modal-title" id="modal-reassign-title">
+                <i class="fas fa-user-pen" style="color:var(--sn-accent);"></i>
+                Reassign Complaint
+            </h2>
+            <button class="sn-btn-icon" data-sn-close="modal-reassign" aria-label="Close modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sn-modal-body">
+            <p class="sn-text-sm sn-text-muted" id="reassign-complaint-ref" style="margin-bottom:var(--sn-md);">Complaint: —</p>
+            <div class="sn-form-group">
+                <label for="reassign-agent" class="sn-form-label">Assign to Agent <span class="required">*</span></label>
+                <select id="reassign-agent" class="sn-form-control" required>
+                    <option value="">Select agent…</option>
+                    <option value="kenji">Kenji Watanabe</option>
+                    <option value="sofia">Sofia Andrade</option>
+                    <option value="priya">Priya Sharma (Mgr)</option>
+                    <option value="omar">Omar Hassan</option>
+                </select>
+            </div>
+            <div class="sn-form-group">
+                <label for="reassign-note" class="sn-form-label">Note (optional)</label>
+                <textarea id="reassign-note" class="sn-form-control" rows="3" placeholder="Reason for reassignment…"></textarea>
+            </div>
+        </div>
+        <div class="sn-modal-footer">
+            <button class="sn-btn sn-btn-ghost sn-btn-sm" data-sn-close="modal-reassign">Cancel</button>
+            <button class="sn-btn sn-btn-primary sn-btn-sm" id="btn-confirm-reassign">
+                <i class="fas fa-user-pen"></i> Reassign
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
+    // ── State ─────────────────────────────────────────────────────
+    var allComplaints = MOCK_DATA.complaints.slice(); // BACKEND INTEGRATION: GET /api/complaints
+    var filtered = allComplaints.slice();
+    var currentPage = 1;
+    var perPage = 20;
+    var bulkMode = false;
+    var selectedIds = new Set();
+    var activeFilters = {};
+
+    // ── Render helpers ────────────────────────────────────────────
+    function getVerifBadgeFromComplaint(c) {
+        if (!c.validation) return '<span class="sn-badge sn-badge-warning">—</span>';
+        return SN.verificationBadge(c.validation.verificationStatus);
+    }
+
+    function renderTable() {
+        var page = SN.paginate(filtered, currentPage, perPage);
+        var tbody = document.getElementById('complaints-table-body');
+        if (!tbody) return;
+
+        if (page.items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="14"><div class="sn-empty-state" style="padding:var(--sn-xl);">' +
+                '<div class="sn-empty-state-icon"><i class="fas fa-inbox"></i></div>' +
+                '<h3>No complaints found</h3>' +
+                '<p>Try adjusting your filters or search terms.</p>' +
+                '</div></td></tr>';
+            updatePagination(page);
+            return;
+        }
+
+        var rows = '';
+        page.items.forEach(function (c) {
+            var isSelected = selectedIds.has(c.id);
+            var chkCol = bulkMode
+                ? '<td><input type="checkbox" class="row-chk" data-id="' + c.id + '" ' + (isSelected ? 'checked' : '') + ' aria-label="Select ' + c.id + '" style="width:16px;height:16px;cursor:pointer;"></td>'
+                : '<td></td>';
+
+            var escBadge = c.escalationFlag
+                ? '<span class="sn-badge sn-status-escalated"><i class="fas fa-triangle-exclamation"></i> Escalated</span>'
+                : '<span class="sn-badge" style="background:var(--sn-success-light);color:var(--sn-success);">Normal</span>';
+
+            rows += '<tr class="clickable" data-id="' + c.id + '">' +
+                    chkCol +
+                    '<td data-label="ID"><a href="/admin/complaint/' + c.id + '" style="color:var(--sn-accent);font-weight:700;text-decoration:none;" onclick="event.stopPropagation();">' + c.id + '</a></td>' +
+                    '<td data-label="Customer"><div>' +
+                        '<div style="font-weight:600;font-size:0.85rem;">' + c.customer.name + '</div>' +
+                        '<div style="font-size:0.72rem;color:var(--sn-text-muted);">' + c.customer.ref + '</div>' +
+                    '</div></td>' +
+                    '<td data-label="Category"><span class="sn-text-sm">' + c.category + '</span></td>' +
+                    '<td data-label="Department"><span class="sn-text-sm">' + c.department + '</span></td>' +
+                    '<td data-label="Priority">' + SN.priorityBadge(c.priority) + '</td>' +
+                    '<td data-label="Sentiment">' + SN.sentimentBadge(c.sentiment) + '</td>' +
+                    '<td data-label="Status">' + SN.statusBadge(c.status) + '</td>' +
+                    '<td data-label="Escalation">' + escBadge + '</td>' +
+                    '<td data-label="AI Validation">' + getVerifBadgeFromComplaint(c) + '</td>' +
+                    '<td data-label="Agent"><span style="font-size:0.82rem;">' + (c.assignedAgent || '<span class="sn-text-muted">Unassigned</span>') + '</span></td>' +
+                    '<td data-label="Submitted"><span style="font-size:0.8rem;white-space:nowrap;">' + SN.formatDate(c.submittedAt) + '</span></td>' +
+                    '<td data-label="Updated"><span style="font-size:0.8rem;white-space:nowrap;color:var(--sn-text-muted);">' + SN.timeAgo(c.updatedAt) + '</span></td>' +
+                    '<td data-label="Actions" style="text-align:right;white-space:nowrap;">' +
+                        '<div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;">' +
+                            '<a href="/admin/complaint/' + c.id + '" class="sn-btn-icon" title="View" aria-label="View ' + c.id + '" onclick="event.stopPropagation();">' +
+                                '<i class="fas fa-eye"></i></a>' +
+                            '<button class="sn-btn-icon btn-reassign-row" data-id="' + c.id + '" title="Reassign" aria-label="Reassign ' + c.id + '">' +
+                                '<i class="fas fa-user-pen"></i></button>' +
+                            '<div class="sn-dropdown-wrap" style="position:relative;">' +
+                                '<button class="sn-btn-icon btn-actions-menu" data-id="' + c.id + '" title="More actions" aria-label="More actions for ' + c.id + '">' +
+                                    '<i class="fas fa-ellipsis-v"></i></button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>' +
+                    '</tr>';
+        });
+        tbody.innerHTML = rows;
+
+        // Row click → view
+        tbody.querySelectorAll('tr.clickable').forEach(function (row) {
+            row.addEventListener('click', function (e) {
+                if (e.target.closest('a, button, input')) return;
+                var id = row.dataset.id;
+                // BACKEND INTEGRATION: navigate to complaint detail
+                SN.toast('Navigate to complaint detail: ' + id, 'info');
+            });
+        });
+
+        // Reassign button
+        tbody.querySelectorAll('.btn-reassign-row').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var id = btn.dataset.id;
+                document.getElementById('reassign-complaint-ref').textContent = 'Complaint: ' + id;
+                SN.openModal('modal-reassign');
+            });
+        });
+
+        // More actions menu
+        tbody.querySelectorAll('.btn-actions-menu').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var id = btn.dataset.id;
+                // BACKEND INTEGRATION: escalate / close / reopen actions
+                SN.toast('Actions menu for ' + id + ' — backend integration pending.', 'info');
+            });
+        });
+
+        // Checkbox handler
+        if (bulkMode) {
+            tbody.querySelectorAll('.row-chk').forEach(function (chk) {
+                chk.addEventListener('change', function () {
+                    if (chk.checked) {
+                        selectedIds.add(chk.dataset.id);
+                    } else {
+                        selectedIds.delete(chk.dataset.id);
+                    }
+                    updateBulkBar();
+                });
+                chk.addEventListener('click', function(e){ e.stopPropagation(); });
+            });
+        }
+
+        updatePagination(page);
+    }
+
+    function updatePagination(page) {
+        var info = document.getElementById('pagination-info');
+        if (info) {
+            var start = Math.min((page.page - 1) * page.perPage + 1, page.total);
+            var end   = Math.min(page.page * page.perPage, page.total);
+            info.textContent = 'Showing ' + start + '–' + end + ' of ' + page.total.toLocaleString() + ' results';
+        }
+        var countLabel = document.getElementById('complaint-count-label');
+        if (countLabel) countLabel.textContent = 'Showing ' + page.total.toLocaleString() + ' complaints';
+        var resultCount = document.getElementById('table-result-count');
+        if (resultCount) resultCount.textContent = page.total.toLocaleString() + ' results';
+
+        var ctrl = document.getElementById('pagination-controls');
+        if (!ctrl) return;
+        var html = '';
+        html += '<button class="sn-page-btn" id="pg-prev" aria-label="Previous page" ' + (page.page <= 1 ? 'disabled' : '') + '>' +
+                '<i class="fas fa-chevron-left"></i></button>';
+        var start_p = Math.max(1, page.page - 2);
+        var end_p   = Math.min(page.totalPages, start_p + 4);
+        for (var p = start_p; p <= end_p; p++) {
+            html += '<button class="sn-page-btn ' + (p === page.page ? 'active' : '') + '" data-page="' + p + '" aria-label="Page ' + p + '" ' + (p === page.page ? 'aria-current="page"' : '') + '>' + p + '</button>';
+        }
+        if (page.totalPages > end_p) {
+            html += '<span style="padding:0 4px;color:var(--sn-text-light);">…</span>';
+            html += '<button class="sn-page-btn" data-page="' + page.totalPages + '">' + page.totalPages + '</button>';
+        }
+        html += '<button class="sn-page-btn" id="pg-next" aria-label="Next page" ' + (page.page >= page.totalPages ? 'disabled' : '') + '>' +
+                '<i class="fas fa-chevron-right"></i></button>';
+        ctrl.innerHTML = html;
+
+        ctrl.querySelectorAll('.sn-page-btn[data-page]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                currentPage = parseInt(btn.dataset.page, 10);
+                renderTable();
+            });
+        });
+        var prev = ctrl.querySelector('#pg-prev');
+        var next = ctrl.querySelector('#pg-next');
+        if (prev) prev.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderTable(); } });
+        if (next) next.addEventListener('click', function() { if (currentPage < page.totalPages) { currentPage++; renderTable(); } });
+    }
+
+    // ── Filter Logic ─────────────────────────────────────────────
+    function applyFilters() {
+        var q          = (document.getElementById('filter-search').value || '').trim().toLowerCase();
+        var status     = document.getElementById('filter-status').value;
+        var category   = document.getElementById('filter-category').value;
+        var department = document.getElementById('filter-department').value;
+        var priority   = document.getElementById('filter-priority').value;
+        var sentiment  = document.getElementById('filter-sentiment').value;
+        var dateFrom   = document.getElementById('filter-date-from').value;
+        var dateTo     = document.getElementById('filter-date-to').value;
+        var escalation = document.getElementById('filter-escalation').value;
+
+        activeFilters = { q, status, category, department, priority, sentiment, dateFrom, dateTo, escalation };
+
+        filtered = allComplaints.filter(function (c) {
+            if (q && !((c.id || '').toLowerCase().includes(q) ||
+                       (c.customer.name || '').toLowerCase().includes(q) ||
+                       (c.customer.ref || '').toLowerCase().includes(q) ||
+                       (c.orderRef || '').toLowerCase().includes(q))) return false;
+            if (status     && c.status     !== status)     return false;
+            if (category   && c.category   !== category)   return false;
+            if (department && c.department !== department)  return false;
+            if (priority   && c.priority   !== priority)   return false;
+            if (sentiment  && c.sentiment  !== sentiment)   return false;
+            if (escalation === 'escalated'     && !c.escalationFlag) return false;
+            if (escalation === 'not-escalated' &&  c.escalationFlag) return false;
+            if (dateFrom) {
+                var ts = new Date(c.submittedAt).getTime();
+                if (ts < new Date(dateFrom).getTime()) return false;
+            }
+            if (dateTo) {
+                var ts2 = new Date(c.submittedAt).getTime();
+                if (ts2 > new Date(dateTo + 'T23:59:59Z').getTime()) return false;
+            }
+            return true;
+        });
+
+        currentPage = 1;
+        renderFilterChips();
+        renderTable();
+    }
+
+    function renderFilterChips() {
+        var container = document.getElementById('active-filter-chips');
+        if (!container) return;
+        var chips = '';
+        var labels = {
+            q: 'Search', status: 'Status', category: 'Category',
+            department: 'Dept', priority: 'Priority', sentiment: 'Sentiment',
+            dateFrom: 'From', dateTo: 'To', escalation: 'Escalation'
+        };
+        Object.entries(activeFilters).forEach(function([key, val]) {
+            if (val) {
+                chips += '<span class="sn-filter-chip">' +
+                         '<span>' + labels[key] + ': <strong>' + val + '</strong></span>' +
+                         '<button onclick="removeFilter(\'' + key + '\')" aria-label="Remove ' + labels[key] + ' filter">' +
+                             '<i class="fas fa-times"></i></button>' +
+                         '</span>';
+            }
+        });
+        container.innerHTML = chips;
+    }
+
+    window.removeFilter = function(key) {
+        var fieldMap = {
+            q: 'filter-search', status: 'filter-status', category: 'filter-category',
+            department: 'filter-department', priority: 'filter-priority',
+            sentiment: 'filter-sentiment', dateFrom: 'filter-date-from',
+            dateTo: 'filter-date-to', escalation: 'filter-escalation'
+        };
+        var el = document.getElementById(fieldMap[key]);
+        if (el) el.value = '';
+        applyFilters();
+    };
+
+    // ── Event listeners ───────────────────────────────────────────
+    document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
+
+    document.getElementById('filter-search').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') applyFilters();
+    });
+
+    document.getElementById('btn-clear-filters').addEventListener('click', function() {
+        ['filter-search','filter-status','filter-category','filter-department',
+         'filter-priority','filter-sentiment','filter-date-from','filter-date-to','filter-escalation'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        activeFilters = {};
+        filtered = allComplaints.slice();
+        currentPage = 1;
+        renderFilterChips();
+        renderTable();
+        SN.toast('Filters cleared.', 'info');
+    });
+
+    document.getElementById('per-page-select').addEventListener('change', function() {
+        perPage = parseInt(this.value, 10);
+        currentPage = 1;
+        renderTable();
+    });
+
+    // ── Bulk mode toggle ──────────────────────────────────────────
+    document.getElementById('btn-toggle-bulk').addEventListener('click', function() {
+        bulkMode = !bulkMode;
+        selectedIds.clear();
+        var hdrChk = document.getElementById('chk-header-all');
+        if (hdrChk) hdrChk.style.display = bulkMode ? 'inline-block' : 'none';
+        document.getElementById('bulk-actions-bar').style.display = bulkMode ? 'block' : 'none';
+        this.setAttribute('aria-pressed', bulkMode ? 'true' : 'false');
+        this.innerHTML = bulkMode
+            ? '<i class="fas fa-times"></i> Cancel Select'
+            : '<i class="fas fa-check-square"></i> Select';
+        renderTable();
+    });
+
+    // Select all from header checkbox
+    document.getElementById('chk-select-all').addEventListener('change', function() {
+        var checked = this.checked;
+        var page = SN.paginate(filtered, currentPage, perPage);
+        page.items.forEach(function(c) {
+            if (checked) selectedIds.add(c.id);
+            else selectedIds.delete(c.id);
+        });
+        renderTable();
+        updateBulkBar();
+    });
+
+    function updateBulkBar() {
+        var lbl = document.getElementById('selected-count-label');
+        if (lbl) lbl.textContent = selectedIds.size + ' selected';
+    }
+
+    document.getElementById('btn-bulk-reassign').addEventListener('click', function() {
+        if (selectedIds.size === 0) { SN.toast('No complaints selected.', 'warning'); return; }
+        // BACKEND INTEGRATION: POST /api/complaints/bulk/reassign
+        SN.toast('Bulk reassign ' + selectedIds.size + ' complaints — backend integration pending.', 'info');
+    });
+
+    document.getElementById('btn-bulk-escalate').addEventListener('click', function() {
+        if (selectedIds.size === 0) { SN.toast('No complaints selected.', 'warning'); return; }
+        // BACKEND INTEGRATION: POST /api/complaints/bulk/escalate
+        SN.toast('Bulk escalate ' + selectedIds.size + ' complaints — backend integration pending.', 'info');
+    });
+
+    document.getElementById('btn-export-selected').addEventListener('click', function() {
+        if (selectedIds.size === 0) { SN.toast('No complaints selected.', 'warning'); return; }
+        // BACKEND INTEGRATION: POST /api/complaints/export with selected IDs
+        SN.toast('Export ' + selectedIds.size + ' complaints — backend integration pending.', 'info');
+    });
+
+    // ── Export buttons ────────────────────────────────────────────
+    document.querySelectorAll('.export-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var fmt = btn.dataset.format;
+            // BACKEND INTEGRATION: GET /api/complaints/export?format=csv|pdf|xlsx
+            SN.toast('Export as ' + fmt.toUpperCase() + ' will be handled by the backend reporting service.', 'info');
+        });
+    });
+
+    // ── Reassign confirm ──────────────────────────────────────────
+    document.getElementById('btn-confirm-reassign').addEventListener('click', function() {
+        var agent = document.getElementById('reassign-agent').value;
+        if (!agent) { SN.toast('Please select an agent.', 'warning'); return; }
+        // BACKEND INTEGRATION: PUT /api/complaints/{id}/assign
+        SN.closeModal('modal-reassign');
+        SN.toast('Complaint reassigned. Backend integration pending.', 'success');
+    });
+
+    // ── Initial render ────────────────────────────────────────────
+    renderTable();
+});
+</script>
+{% endblock %}

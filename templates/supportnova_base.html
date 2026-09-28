@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}SupportNova{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- SupportNova Design System -->
+    <link rel="stylesheet" href="/static/css/supportnova.css" />
+
+    <!--
+        BACKEND INTEGRATION:
+        If the host company provides a theme override, inject it here.
+        E.g., <style>:root { --sn-primary: #003087; }</style>
+    -->
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="sn-app">
+    <!--
+        sn-sidebar-overlay: Dims the page on mobile when sidebar is open.
+        Controlled by SN.initSidebar() in core.js
+    -->
+    <div class="sn-sidebar-overlay" id="sn-sidebar-overlay"></div>
+
+    <!-- ── Top Navbar ──────────────────────────────────────── -->
+    <nav
+      class="sn-navbar"
+      role="navigation"
+      aria-label="SupportNova navigation"
+    >
+      <!-- Mobile menu toggle -->
+      <button
+        class="sn-menu-toggle"
+        id="sn-menu-toggle"
+        aria-label="Toggle sidebar"
+        aria-expanded="false"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+      <a
+        class="sn-navbar-btn sn-navbar-back"
+        href="/"
+        aria-label="Return to VoltCart"
+        title="Return to VoltCart"
+      >
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+      </a>
+
+      <!-- Brand -->
+      <a href="/support/" class="sn-navbar-brand" aria-label="SupportNova home">
+        <!--
+                SupportNova Logo Mark — intentionally neutral so it can be
+                embedded in any company's product. No VoltCart-specific branding.
+            -->
+        <div class="sn-logo-mark" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7z"
+              fill="currentColor"
+              opacity="0.9"
+            />
+            <path
+              d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"
+              fill="currentColor"
+              opacity="0.6"
+            />
+            <circle cx="12" cy="9" r="2.5" fill="white" opacity="0.9" />
+          </svg>
+        </div>
+        <span>SupportNova</span>
+      </a>
+
+      <!-- Context breadcrumb / page title (injected per page) -->
+      <div class="sn-navbar-spacer"></div>
+
+      <!-- Navbar context info -->
+      {% block navbar_context %}{% endblock %}
+
+      <!-- Navbar actions -->
+      <div class="sn-navbar-actions">
+        <!--
+                BACKEND INTEGRATION:
+                Replace this with real user session info from Flask context.
+                e.g., current_user.name, current_user.role
+            -->
+        <span class="sn-navbar-role-badge"
+          >{% block user_role %}Agent{% endblock %}</span
+        >
+
+        <button
+          class="sn-navbar-btn"
+          aria-label="Notifications"
+          id="sn-notif-btn"
+        >
+          <i class="fas fa-bell"></i>
+          <span
+            class="sn-nav-badge"
+            id="sn-notif-count"
+            style="
+              background: #ef4444;
+              font-size: 0.6rem;
+              padding: 0.1rem 0.35rem;
+              margin-left: 2px;
+            "
+            >3</span
+          >
+        </button>
+
+        <!--
+                BACKEND INTEGRATION:
+                Link to the appropriate logout / account route from your auth system.
+                Do not hard-code URLs — use url_for() when available.
+            -->
+        <button class="sn-navbar-btn" aria-label="Account" id="sn-account-btn">
+          <i class="fas fa-user-circle"></i>
+          <span style="display: none" class="d-sm-inline">
+            {# BACKEND INTEGRATION: {{ current_user.name | truncate(12) }} #}
+            Agent
+          </span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── App Layout ───────────────────────────────────────── -->
+    <div class="sn-layout">
+      <!-- ── Sidebar ─────────────────────────────────────── -->
+      <aside
+        class="sn-sidebar"
+        id="sn-sidebar"
+        role="navigation"
+        aria-label="SupportNova sidebar"
+      >
+        {% block sidebar %}
+        <!-- Default sidebar — override in role-specific templates -->
+        <div class="sn-sidebar-section">
+          <div class="sn-sidebar-label">Navigation</div>
+          <a href="/support/" class="sn-nav-link"
+            ><i class="fas fa-home"></i> Help Center</a
+          >
+          <a href="/support/submit" class="sn-nav-link"
+            ><i class="fas fa-plus-circle"></i> Submit Complaint</a
+          >
+          <a href="/support/dashboard" class="sn-nav-link"
+            ><i class="fas fa-list"></i> My Complaints</a
+          >
+        </div>
+        {% endblock %}
+
+        <!-- Sidebar footer -->
+        <div
+          class="sn-sidebar-section"
+          style="
+            margin-top: auto;
+            border-top: 1px solid var(--sn-border);
+            padding-top: var(--sn-sm);
+          "
+        >
+          <!--
+                    BACKEND INTEGRATION:
+                    Link to host company website. This value could be a Jinja config variable.
+                    e.g., {{ config.COMPANY_NAME }}, {{ config.COMPANY_URL }}
+                -->
+          <a href="/" class="sn-nav-link" style="font-size: 0.8rem">
+            <i class="fas fa-arrow-left"></i>
+            Return to VoltCart
+          </a>
+        </div>
+      </aside>
+
+      <!-- ── Main Content ────────────────────────────────── -->
+      <main class="sn-main" id="sn-main" role="main">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <!-- ── Toast Container ──────────────────────────────────── -->
+    <div
+      class="sn-toast-container"
+      id="sn-toast-container"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+
+    <!--
+        BACKEND INTEGRATION:
+        Mock data is loaded here for development/demo purposes only.
+        When the backend is connected, remove this script tag and
+        replace all MOCK_DATA references with real API responses.
+    -->
+    <script src="/static/js/mock/complaints.js"></script>
+
+    <!-- SupportNova Core Utilities -->
+    <script src="/static/js/supportnova/core.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+      // Global navbar interactions
+      document.addEventListener("DOMContentLoaded", function () {
+        // Notification button (placeholder)
+        const notifBtn = document.getElementById("sn-notif-btn");
+        if (notifBtn) {
+          notifBtn.addEventListener("click", function () {
+            SN.toast(
+              "Notification system will be connected by the backend team.",
+              "info",
+            );
+          });
+        }
+
+        // Account button (placeholder)
+        const accountBtn = document.getElementById("sn-account-btn");
+        if (accountBtn) {
+          accountBtn.addEventListener("click", function () {
+            // BACKEND INTEGRATION: Replace with real account dropdown / auth route
+            SN.toast("Account management handled by the auth system.", "info");
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

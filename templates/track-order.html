@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Track Order - VoltCart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .track-container {
+        max-width: 800px;
+        margin: var(--spacing-section) auto;
+        background: var(--color-white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .timeline {
+        position: relative;
+        max-width: 100%;
+        margin: var(--spacing-xxl) 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--color-border);
+        z-index: 1;
+    }
+    .timeline-progress {
+        position: absolute;
+        top: 24px;
+        left: 0;
+        height: 4px;
+        background: var(--color-spark);
+        z-index: 2;
+        transition: width 1s ease-in-out;
+    }
+    
+    .timeline-step {
+        position: relative;
+        z-index: 3;
+        text-align: center;
+        flex: 1;
+    }
+    .step-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--color-white);
+        border: 4px solid var(--color-border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-sm);
+        color: var(--color-text-muted);
+        font-size: 1.25rem;
+        transition: all var(--transition-normal);
+    }
+    .timeline-step.completed .step-icon {
+        border-color: var(--color-navy);
+        background: var(--color-navy);
+        color: var(--color-spark);
+    }
+    .timeline-step.active .step-icon {
+        border-color: var(--color-spark);
+        color: var(--color-navy);
+        box-shadow: 0 0 0 4px rgba(232, 255, 77, 0.2);
+    }
+    
+    .step-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--color-text-muted);
+    }
+    .timeline-step.completed .step-label,
+    .timeline-step.active .step-label {
+        color: var(--color-navy);
+    }
+
+    .track-search {
+        display: flex;
+        gap: var(--spacing-sm);
+        max-width: 500px;
+        margin: 0 auto var(--spacing-xl);
+    }
+
+    @media (max-width: 768px) {
+        .timeline {
+            flex-direction: column;
+            gap: var(--spacing-xl);
+            padding-left: 24px;
+        }
+        .timeline::before {
+            top: 0; left: 47px; width: 4px; height: 100%;
+        }
+        .timeline-progress {
+            top: 0; left: 47px; width: 4px; transition: height 1s ease-in-out;
+        }
+        .timeline-step {
+            display: flex;
+            align-items: center;
+            text-align: left;
+            gap: var(--spacing-md);
+        }
+        .step-icon { margin: 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="track-container">
+        <h2 class="text-center" style="margin-bottom: var(--spacing-lg);">Track Your Order</h2>
+        
+        <form class="track-search" id="track-form">
+            <input type="text" class="form-control" id="track-id-input" placeholder="Enter Order Number (e.g. VC-123456)" required>
+            <button type="submit" class="btn btn-primary">Track</button>
+        </form>
+
+        <div id="tracking-result" class="hidden">
+            <div style="background: var(--color-cream); padding: var(--spacing-md); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Order <span id="display-order-id"></span></strong>
+                    <div class="text-muted" style="font-size: 0.875rem;">Estimated Delivery: <span id="display-date"></span></div>
+                </div>
+                <span class="badge badge-best">In Transit</span>
+            </div>
+
+            <div class="timeline" id="timeline">
+                <div class="timeline-progress" id="progress-bar"></div>
+                
+                <div class="timeline-step completed">
+                    <div class="step-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="step-label">Order<br>Confirmed</div>
+                </div>
+                <div class="timeline-step completed">
+                    <div class="step-icon"><i class="fas fa-box"></i></div>
+                    <div class="step-label">Processing</div>
+                </div>
+                <div class="timeline-step active">
+                    <div class="step-icon"><i class="fas fa-truck"></i></div>
+                    <div class="step-label">Shipped</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-icon"><i class="fas fa-route"></i></div>
+                    <div class="step-label">Out for<br>Delivery</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-icon"><i class="fas fa-home"></i></div>
+                    <div class="step-label">Delivered</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: var(--spacing-xl); text-align: center;">
+                <p>Need help with this order?</p>
+                <a href="/help-center.html" class="btn btn-outline">Visit Help Center</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order');
+        
+        const trackForm = document.getElementById('track-form');
+        const trackInput = document.getElementById('track-id-input');
+        const result = document.getElementById('tracking-result');
+        const progressBar = document.getElementById('progress-bar');
+        
+        function showTracking(id) {
+            document.getElementById('display-order-id').textContent = id;
+            
+            // Generate a random date 2-4 days from now
+            const date = new Date();
+            date.setDate(date.getDate() + Math.floor(Math.random() * 3) + 2);
+            document.getElementById('display-date').textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            
+            result.classList.remove('hidden');
+            
+            // Animate progress
+            setTimeout(() => {
+                if (window.innerWidth <= 768) {
+                    progressBar.style.width = '4px';
+                    progressBar.style.height = '50%';
+                } else {
+                    progressBar.style.height = '4px';
+                    progressBar.style.width = '50%'; // Reaches "Shipped"
+                }
+            }, 100);
+        }
+        
+        if (orderId) {
+            trackInput.value = orderId;
+            showTracking(orderId);
+        }
+        
+        trackForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = trackInput.value.trim();
+            if (id) {
+                // Update URL without reload
+                window.history.pushState({}, '', `/track-order.html?order=${encodeURIComponent(id)}`);
+                showTracking(id);
+            }
+        });
+    });
+</script>
+{% endblock %}

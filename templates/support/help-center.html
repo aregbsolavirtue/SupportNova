@@ -1,0 +1,777 @@
+{% extends "supportnova_base.html" %} {% block title %}Help Center —
+SupportNova{% endblock %} {% block user_role %}Customer{% endblock %} {# ──
+Sidebar: Customer Navigation ──────────────────────────────── #} {% block
+sidebar %}
+<div class="sn-sidebar-section">
+  <div class="sn-sidebar-label">Support Menu</div>
+  <a href="/support/" class="sn-nav-link active" aria-current="page">
+    <i class="fas fa-house" aria-hidden="true"></i> Help Center
+  </a>
+  <a href="/support/submit" class="sn-nav-link">
+    <i class="fas fa-pen-to-square" aria-hidden="true"></i> Submit a Complaint
+  </a>
+  <a href="/support/dashboard" class="sn-nav-link">
+    <i class="fas fa-list-check" aria-hidden="true"></i> My Complaints
+  </a>
+  <a href="/support/history" class="sn-nav-link">
+    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Complaint
+    History
+  </a>
+</div>
+<div class="sn-sidebar-section">
+  <div class="sn-sidebar-label">Quick Actions</div>
+  <a href="/support/track" class="sn-nav-link">
+    <i class="fas fa-magnifying-glass" aria-hidden="true"></i> Track a Complaint
+  </a>
+</div>
+{% endblock %} {% block extra_css %}
+<style>
+  /* ── Hero Section ─────────────────────────────────────────── */
+  .sn-hero {
+    background: linear-gradient(
+      135deg,
+      var(--sn-primary) 0%,
+      var(--sn-primary-light) 60%,
+      #2d4f8e 100%
+    );
+    border-radius: var(--sn-radius-xl);
+    padding: var(--sn-xxl) var(--sn-xl);
+    margin-bottom: var(--sn-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .sn-hero::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(79, 127, 255, 0.12);
+    pointer-events: none;
+  }
+  .sn-hero::after {
+    content: "";
+    position: absolute;
+    bottom: -80px;
+    left: -40px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+  }
+  .sn-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(79, 127, 255, 0.25);
+    color: #93c5fd;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0.3rem 0.9rem;
+    border-radius: var(--sn-radius-pill);
+    margin-bottom: var(--sn-md);
+  }
+  .sn-hero h1 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 var(--sn-sm);
+    line-height: 1.2;
+  }
+  .sn-hero p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 0 var(--sn-xl);
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* Search bar */
+  .sn-hero-search {
+    max-width: 560px;
+    margin: 0 auto var(--sn-lg);
+    position: relative;
+    z-index: 1;
+  }
+  .sn-hero-search input {
+    width: 100%;
+    padding: 0.9rem 3.5rem 0.9rem 1.25rem;
+    border-radius: var(--sn-radius-pill);
+    border: none;
+    font-size: 0.95rem;
+    font-family: var(--sn-font);
+    background: #fff;
+    color: var(--sn-text);
+    box-shadow: var(--sn-shadow-lg);
+    box-sizing: border-box;
+  }
+  .sn-hero-search input:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 4px rgba(79, 127, 255, 0.35),
+      var(--sn-shadow-lg);
+  }
+  .sn-hero-search input::placeholder {
+    color: var(--sn-text-light);
+  }
+  .sn-hero-search-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--sn-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--sn-radius-pill);
+    padding: 0.55rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--sn-font);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background var(--sn-transition);
+  }
+  .sn-hero-search-btn:hover {
+    background: var(--sn-accent-hover);
+  }
+  /* Hero CTA buttons */
+  .sn-hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sn-md);
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .sn-hero-actions .sn-btn-primary {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.75rem;
+    box-shadow: 0 4px 14px rgba(79, 127, 255, 0.45);
+  }
+  .sn-hero-actions .sn-btn-outline {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+    font-size: 0.95rem;
+    padding: 0.75rem 1.75rem;
+  }
+  .sn-hero-actions .sn-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+  }
+
+  /* ── Topics Grid ──────────────────────────────────────────── */
+  .sn-topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--sn-md);
+    margin-bottom: var(--sn-xl);
+  }
+  .sn-topic-card {
+    background: var(--sn-surface);
+    border: 1px solid var(--sn-border);
+    border-radius: var(--sn-radius-lg);
+    padding: var(--sn-lg);
+    text-decoration: none;
+    color: var(--sn-text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sn-sm);
+    transition: all var(--sn-transition);
+    box-shadow: var(--sn-shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .sn-topic-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--topic-color, var(--sn-accent));
+    border-radius: 0 0 var(--sn-radius-lg) var(--sn-radius-lg);
+    opacity: 0;
+    transition: opacity var(--sn-transition);
+  }
+  .sn-topic-card:hover {
+    box-shadow: var(--sn-shadow-md);
+    border-color: var(--topic-color, var(--sn-accent));
+    transform: translateY(-2px);
+    color: var(--sn-text);
+  }
+  .sn-topic-card:hover::after {
+    opacity: 1;
+  }
+  .sn-topic-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--sn-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    background: var(--topic-bg, var(--sn-accent-light));
+    color: var(--topic-color, var(--sn-accent));
+    flex-shrink: 0;
+  }
+  .sn-topic-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--sn-primary);
+    margin: 0;
+  }
+  .sn-topic-desc {
+    font-size: 0.8rem;
+    color: var(--sn-text-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .sn-topic-arrow {
+    margin-top: auto;
+    font-size: 0.75rem;
+    color: var(--topic-color, var(--sn-accent));
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* ── Feature Callout ──────────────────────────────────────── */
+  .sn-feature-strip {
+    background: var(--sn-surface);
+    border: 1px solid var(--sn-border);
+    border-radius: var(--sn-radius-xl);
+    padding: var(--sn-xl);
+    margin-bottom: var(--sn-xl);
+    box-shadow: var(--sn-shadow-sm);
+  }
+  .sn-feature-strip-header {
+    text-align: center;
+    margin-bottom: var(--sn-xl);
+  }
+  .sn-feature-strip-header h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-xs);
+  }
+  .sn-feature-strip-header p {
+    font-size: 0.875rem;
+    color: var(--sn-text-muted);
+    margin: 0;
+  }
+  .sn-feature-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: var(--sn-lg);
+  }
+  .sn-feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sn-sm);
+    padding: var(--sn-lg);
+    background: var(--sn-surface-2);
+    border-radius: var(--sn-radius-lg);
+    border: 1px solid var(--sn-border-light);
+    transition: box-shadow var(--sn-transition);
+  }
+  .sn-feature-item:hover {
+    box-shadow: var(--sn-shadow-sm);
+  }
+  .sn-feature-item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--sn-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+  .sn-feature-item h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--sn-primary);
+    margin: 0;
+  }
+  .sn-feature-item p {
+    font-size: 0.8rem;
+    color: var(--sn-text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ── Recent Activity / Empty State ───────────────────────── */
+  .sn-empty-state {
+    text-align: center;
+    padding: var(--sn-xl) var(--sn-lg);
+  }
+  .sn-empty-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto var(--sn-md);
+    background: var(--sn-surface-2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: var(--sn-text-light);
+  }
+  .sn-empty-state h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-xs);
+  }
+  .sn-empty-state p {
+    font-size: 0.85rem;
+    color: var(--sn-text-muted);
+    margin: 0 0 var(--sn-lg);
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── CTA Banner ───────────────────────────────────────────── */
+  .sn-cta-banner {
+    background: linear-gradient(135deg, var(--sn-accent) 0%, #3b5fe0 100%);
+    border-radius: var(--sn-radius-xl);
+    padding: var(--sn-xl) var(--sn-xxl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sn-xl);
+    flex-wrap: wrap;
+    margin-bottom: var(--sn-xl);
+  }
+  .sn-cta-banner-text h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 var(--sn-xs);
+  }
+  .sn-cta-banner-text p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+  .sn-cta-banner-actions {
+    display: flex;
+    gap: var(--sn-sm);
+    flex-wrap: wrap;
+  }
+  .sn-cta-banner .sn-btn-white {
+    background: #fff;
+    color: var(--sn-accent);
+    font-weight: 700;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--sn-radius-md);
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sn-font);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all var(--sn-transition);
+  }
+  .sn-cta-banner .sn-btn-white:hover {
+    box-shadow: var(--sn-shadow-md);
+    transform: translateY(-1px);
+  }
+  .sn-cta-banner .sn-btn-ghost-white {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--sn-radius-md);
+    font-size: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-family: var(--sn-font);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all var(--sn-transition);
+  }
+  .sn-cta-banner .sn-btn-ghost-white:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ── Section label ────────────────────────────────────────── */
+  .sn-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--sn-primary);
+    margin: 0 0 var(--sn-md);
+    display: flex;
+    align-items: center;
+    gap: var(--sn-sm);
+  }
+  .sn-section-subtitle {
+    font-size: 0.8rem;
+    color: var(--sn-text-muted);
+    font-weight: 400;
+    margin-left: auto;
+  }
+</style>
+{% endblock %} {% block content %} {# ── Hero
+───────────────────────────────────────────────────────── #}
+<section class="sn-hero" aria-labelledby="hero-heading">
+  <div class="sn-hero-eyebrow">
+    <i class="fas fa-headset" aria-hidden="true"></i>
+    Customer Support
+  </div>
+  <h1 id="hero-heading">How can we help you today?</h1>
+  <p>
+    Search our help articles, submit a complaint, or track an existing request —
+    we're here to make things right.
+  </p>
+
+  <div class="sn-hero-search" role="search">
+    <label for="hero-search" class="sr-only">Search help topics</label>
+    <input
+      type="search"
+      id="hero-search"
+      placeholder="e.g. 'My order hasn't arrived' or 'Request a refund'…"
+      aria-label="Search help topics"
+      autocomplete="off"
+    />
+    <button
+      class="sn-hero-search-btn"
+      type="button"
+      id="hero-search-btn"
+      aria-label="Search"
+    >
+      <i class="fas fa-search" aria-hidden="true"></i> Search
+    </button>
+  </div>
+
+  <div class="sn-hero-actions">
+    <a href="/support/submit" class="sn-btn sn-btn-primary">
+      <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+      Submit a Complaint
+    </a>
+    <a href="/support/track" class="sn-btn sn-btn-outline">
+      <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+      Track My Complaint
+    </a>
+  </div>
+</section>
+
+{# ── Popular Topics ─────────────────────────────────────────────── #}
+<section aria-labelledby="topics-heading">
+  <h2 class="sn-section-title" id="topics-heading">
+    <i
+      class="fas fa-star"
+      style="color: var(--sn-warning)"
+      aria-hidden="true"
+    ></i>
+    Popular Topics
+    <span class="sn-section-subtitle">Select a topic to get started</span>
+  </h2>
+
+  <div class="sn-topics-grid" role="list">
+    <a
+      href="/support/submit?category=Orders+%26+Delivery"
+      class="sn-topic-card"
+      style="--topic-color: #4f7fff; --topic-bg: rgba(79, 127, 255, 0.1)"
+      role="listitem"
+      aria-label="Orders and Delivery help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-truck-fast" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Orders &amp; Delivery</p>
+      <p class="sn-topic-desc">
+        Late deliveries, missing parcels, tracking updates, and order status.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+
+    <a
+      href="/support/submit?category=Payments+%26+Billing"
+      class="sn-topic-card"
+      style="--topic-color: #10b981; --topic-bg: rgba(16, 185, 129, 0.1)"
+      role="listitem"
+      aria-label="Payments and Billing help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-credit-card" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Payments &amp; Billing</p>
+      <p class="sn-topic-desc">
+        Duplicate charges, payment failures, invoices, and billing queries.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+
+    <a
+      href="/support/submit?category=Returns+%26+Refunds"
+      class="sn-topic-card"
+      style="--topic-color: #f59e0b; --topic-bg: rgba(245, 158, 11, 0.1)"
+      role="listitem"
+      aria-label="Returns and Refunds help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Returns &amp; Refunds</p>
+      <p class="sn-topic-desc">
+        Return requests, refund status, exchange policies, and timelines.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+
+    <a
+      href="/support/submit?category=Product+Issues"
+      class="sn-topic-card"
+      style="--topic-color: #ef4444; --topic-bg: rgba(239, 68, 68, 0.1)"
+      role="listitem"
+      aria-label="Product Issues help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Product Issues</p>
+      <p class="sn-topic-desc">
+        Faulty items, wrong products received, quality concerns, and defects.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+
+    <a
+      href="/support/submit?category=Account+%26+Access"
+      class="sn-topic-card"
+      style="--topic-color: #7c3aed; --topic-bg: rgba(124, 58, 237, 0.1)"
+      role="listitem"
+      aria-label="Account help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-user-shield" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Account</p>
+      <p class="sn-topic-desc">
+        Login issues, account access, profile updates, and security questions.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+
+    <a
+      href="/support/submit?category=Technical+Issues"
+      class="sn-topic-card"
+      style="--topic-color: #0891b2; --topic-bg: rgba(8, 145, 178, 0.1)"
+      role="listitem"
+      aria-label="Technical Issues help topic"
+    >
+      <div class="sn-topic-icon">
+        <i class="fas fa-screwdriver-wrench" aria-hidden="true"></i>
+      </div>
+      <p class="sn-topic-title">Technical Issues</p>
+      <p class="sn-topic-desc">
+        App or website problems, errors, slow performance, and bugs.
+      </p>
+      <span class="sn-topic-arrow"
+        >Get help <i class="fas fa-arrow-right" aria-hidden="true"></i
+      ></span>
+    </a>
+  </div>
+</section>
+
+{# ── SupportNova Feature Callout ────────────────────────────────── #}
+<section class="sn-feature-strip" aria-labelledby="features-heading">
+  <div class="sn-feature-strip-header">
+    <h2 id="features-heading">What happens when you reach out?</h2>
+    <p>
+      We've built a smarter way to handle your complaints — fast, fair, and
+      transparent.
+    </p>
+  </div>
+  <div class="sn-feature-cards">
+    <div class="sn-feature-item">
+      <div
+        class="sn-feature-item-icon"
+        style="background: var(--sn-ai-light); color: var(--sn-ai-color)"
+      >
+        <i class="fas fa-brain" aria-hidden="true"></i>
+      </div>
+      <h3>Intelligent Analysis</h3>
+      <p>
+        As soon as you submit, your complaint is carefully read and understood,
+        so nothing gets missed.
+      </p>
+    </div>
+    <div class="sn-feature-item">
+      <div
+        class="sn-feature-item-icon"
+        style="background: var(--sn-info-light); color: var(--sn-info)"
+      >
+        <i class="fas fa-route" aria-hidden="true"></i>
+      </div>
+      <h3>Smart Routing</h3>
+      <p>
+        Your request is automatically sent to exactly the right support team who
+        can resolve it fastest.
+      </p>
+    </div>
+    <div class="sn-feature-item">
+      <div
+        class="sn-feature-item-icon"
+        style="background: var(--sn-success-light); color: var(--sn-success)"
+      >
+        <i class="fas fa-bell" aria-hidden="true"></i>
+      </div>
+      <h3>Real-time Updates</h3>
+      <p>
+        Track your complaint every step of the way. No more wondering — you'll
+        always know the status.
+      </p>
+    </div>
+  </div>
+</section>
+
+{# ── Recent Activity Section ────────────────────────────────────── #} {#
+BACKEND INTEGRATION: If the user is authenticated (current_user is set), replace
+the empty state below with a rendered list of recent complaints for that user.
+e.g. {% if current_user and recent_complaints %} ...render complaint rows... {%
+else %} ...show sign-in prompt... {% endif %} #}
+<section aria-labelledby="recent-heading" style="margin-bottom: var(--sn-xl)">
+  <div class="sn-card">
+    <div class="sn-card-header">
+      <h2 class="sn-card-title" id="recent-heading">
+        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+        Recent Activity
+      </h2>
+      <a href="/support/dashboard" class="sn-btn sn-btn-outline sn-btn-sm"
+        >View All</a
+      >
+    </div>
+    <div class="sn-card-body" id="recent-activity-container">
+      {# BACKEND INTEGRATION: Replace with real recent complaints if user is
+      logged in #}
+      <div class="sn-empty-state">
+        <div class="sn-empty-icon">
+          <i class="fas fa-inbox" aria-hidden="true"></i>
+        </div>
+        <h3>Sign in to view your recent complaints</h3>
+        <p>
+          Once you're signed in, your most recent support requests will appear
+          here so you can track them at a glance.
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: var(--sn-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <a href="/auth/login?next=/support/" class="sn-btn sn-btn-primary">
+            <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+            Sign In
+          </a>
+          <a href="/support/track" class="sn-btn sn-btn-outline">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            Track by ID
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── CTA Banner ─────────────────────────────────────────────────── #}
+<section aria-labelledby="cta-heading">
+  <div class="sn-cta-banner">
+    <div class="sn-cta-banner-text">
+      <h2 id="cta-heading">Can't find what you need?</h2>
+      <p>
+        Tell us what happened and our support team will look into it right away.
+      </p>
+    </div>
+    <div class="sn-cta-banner-actions">
+      <a href="/support/submit" class="sn-btn-white">
+        <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+        Submit a Complaint
+      </a>
+      <a href="/support/track" class="sn-btn-ghost-white">
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        Track Complaint
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+
+    // ── Hero search ────────────────────────────────────────────
+    const heroSearch = document.getElementById("hero-search");
+    const heroSearchBtn = document.getElementById("hero-search-btn");
+
+    function doSearch() {
+      const q = (heroSearch.value || "").trim();
+      if (!q) {
+        SN.toast("Please type something to search for.", "info");
+        heroSearch.focus();
+        return;
+      }
+      // BACKEND INTEGRATION: Replace with real search route or API call
+      // e.g. window.location.href = '/support/search?q=' + encodeURIComponent(q);
+      SN.toast(
+        "Search will be connected to the help article system by the backend team.",
+        "info",
+      );
+    }
+
+    if (heroSearchBtn) heroSearchBtn.addEventListener("click", doSearch);
+    if (heroSearch) {
+      heroSearch.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") doSearch();
+      });
+    }
+
+    // ── Topic cards: pre-fill category on submit page ─────────
+    document.querySelectorAll(".sn-topic-card").forEach(function (card) {
+      card.addEventListener("click", function (e) {
+        // Allow natural navigation — href handles it
+      });
+    });
+
+    // ── Recent activity: check if user data available ──────────
+    // BACKEND INTEGRATION: Replace the block below with real user session check
+    // If current_user is available from Jinja context, render real complaints
+    // from the server instead of showing the empty state.
+    //
+    // Example API call when backend is connected:
+    // fetch('/api/complaints?limit=3')
+    //   .then(r => r.json())
+    //   .then(data => renderRecentActivity(data.complaints));
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}VoltCart - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: radial-gradient(circle at top left, rgba(232,255,77,0.2), transparent 30%), var(--color-navy);
+        color: var(--color-white);
+        padding: 1.5rem 0 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-shell {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 var(--spacing-lg);
+    }
+    .hero-carousel {
+        position: relative;
+        min-height: 430px;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        background: rgba(255,255,255,0.04);
+        box-shadow: 0 24px 60px rgba(27, 42, 74, 0.35);
+    }
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        align-items: center;
+        padding: 2.5rem 3rem;
+        background: linear-gradient(135deg, rgba(27,42,74,0.96), rgba(42,62,107,0.9));
+    }
+    .hero-slide.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .hero-copy {
+        max-width: 620px;
+        position: relative;
+        z-index: 2;
+    }
+    .hero-copy .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(232,255,77,0.15);
+        color: var(--color-spark);
+        border: 1px solid rgba(232,255,77,0.25);
+        border-radius: var(--radius-pill);
+        padding: 0.45rem 0.8rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+    .hero-copy h1 {
+        color: var(--color-white);
+        font-size: 4.2rem;
+        line-height: 0.96;
+        margin-bottom: 1rem;
+        letter-spacing: -0.06em;
+    }
+    .hero-copy p {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.78);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .hero-metrics {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 1.75rem;
+    }
+    .hero-metrics div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .hero-metrics strong {
+        color: var(--color-white);
+        font-size: 1.15rem;
+    }
+    .hero-metrics span {
+        color: rgba(255,255,255,0.7);
+        font-size: 0.8rem;
+    }
+    .hero-product-visual {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 350px;
+    }
+    .hero-product-visual img {
+        width: min(420px, 90%);
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 65px rgba(0,0,0,0.28);
+        object-fit: cover;
+        aspect-ratio: 1 / 1;
+        transform: rotate(4deg);
+    }
+    .hero-badge {
+        position: absolute;
+        left: 8%;
+        bottom: 10%;
+        background: rgba(232,255,77,0.98);
+        color: var(--color-navy);
+        padding: 0.8rem 1rem;
+        border-radius: 1rem;
+        font-weight: 800;
+        box-shadow: var(--shadow-md);
+    }
+    .hero-dot-nav {
+        position: absolute;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.5rem;
+        z-index: 4;
+    }
+    .hero-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.5);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .hero-dot.active {
+        width: 28px;
+        background: var(--color-spark);
+    }
+    .category-section .grid {
+        margin-top: var(--spacing-xl);
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--spacing-xl);
+    }
+    .section-header h2 {
+        margin: 0;
+    }
+    .promo-banner {
+        background: linear-gradient(135deg, var(--color-spark) 0%, #cfe434 100%);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--color-navy);
+        box-shadow: 0 14px 34px rgba(232,255,77,0.22);
+    }
+    .promo-banner h2 { color: var(--color-navy); margin-bottom: var(--spacing-sm); }
+    @media (max-width: 768px) {
+        .promo-banner { flex-direction: column; text-align: center; gap: var(--spacing-lg); }
+        .hero-copy h1 { font-size: 3.2rem; }
+        .category-section .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 1024px) {
+        .category-section .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .product-grid .product-card .card-body { padding: 0.8rem; }
+    .product-grid .product-card .product-title { font-size: 0.92rem; }
+    .product-grid .product-card .price-current { font-size: 1.1rem; }
+    @media (max-width: 1200px) {
+        .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+        .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+        .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+        .product-grid .product-card .card-body { padding: 0.65rem; }
+        .product-grid .product-card .product-title { font-size: 0.85rem; }
+        .product-grid .product-card .rating-count { display: none; }
+        .product-grid .product-card .btn-add-cart { padding: 0.55rem 0.4rem; font-size: 0.8rem; }
+        .category-section .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .hero-carousel { min-height: 0; }
+        .hero-slide {
+            position: relative;
+            inset: auto;
+            display: none;
+            grid-template-columns: 1fr;
+            padding: 1.25rem 1rem 2.5rem;
+        }
+        .hero-slide.active { display: grid; }
+        .hero-copy h1 { font-size: 2.1rem; }
+        .hero-copy p { font-size: 0.95rem; margin-bottom: 1rem; }
+        .hero-actions { gap: 0.5rem; margin-top: 1rem; }
+        .hero-actions .btn { padding: 0.65rem 0.9rem; font-size: 0.9rem; }
+        .hero-actions .btn-outline { display: none; }
+        .hero-product-visual { min-height: 150px; }
+        .hero-product-visual img { width: min(160px, 60%); }
+        .hero-metrics { display: none; }
+        .hero-copy h1 { line-height: 1.02; }
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-lg);
+        text-align: center;
+    }
+    .feature-item .icon {
+        font-size: 2.5rem;
+        color: var(--color-spark);
+        margin-bottom: var(--spacing-md);
+        background: var(--color-navy);
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    @media (max-width: 768px) {
+        .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+        .features-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-shell">
+        <div class="hero-carousel" id="hero-carousel" aria-live="polite"></div>
+    </div>
+</section>
+
+<section class="section category-section container">
+    <div class="section-header">
+        <h2>Shop by Category</h2>
+    </div>
+    <div class="grid grid-cols-5 gap-md">
+        <a href="/shop.html?category=Chargers" class="category-card">
+            <i class="fas fa-plug icon"></i>
+            <h3>Chargers</h3>
+        </a>
+        <a href="/shop.html?category=Cables" class="category-card">
+            <i class="fas fa-project-diagram icon"></i>
+            <h3>Cables</h3>
+        </a>
+        <a href="/shop.html?category=Power" class="category-card">
+            <i class="fas fa-battery-full icon"></i>
+            <h3>Power Banks</h3>
+        </a>
+        <a href="/shop.html?category=Audio" class="category-card">
+            <i class="fas fa-headphones icon"></i>
+            <h3>Audio</h3>
+        </a>
+        <a href="/shop.html?category=Mobile+Devices" class="category-card">
+            <i class="fas fa-mobile-alt icon"></i>
+            <h3>Smartphones</h3>
+        </a>
+        <a href="/shop.html?category=Wearables" class="category-card">
+            <i class="fas fa-clock icon"></i>
+            <h3>Wearables</h3>
+        </a>
+        <a href="/shop.html?category=Computers+%26+Gaming" class="category-card">
+            <i class="fas fa-laptop icon"></i>
+            <h3>Computers</h3>
+        </a>
+        <a href="/shop.html?category=Computer+Components" class="category-card">
+            <i class="fas fa-microchip icon"></i>
+            <h3>Components</h3>
+        </a>
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-header">
+        <h2>Featured Collection</h2>
+        <a href="/shop.html" class="text-navy" style="font-weight: 600;">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="product-grid" id="featured-products"></div>
+</section>
+
+<section class="section container">
+    <div class="promo-banner">
+        <div>
+            <h2>GaN Fast Chargers are here.</h2>
+            <p style="font-size: 1.25rem; margin-bottom: 0;">Smaller, faster, cooler. Upgrade your charging experience.</p>
+        </div>
+        <a href="/shop.html?q=GaN" class="btn btn-secondary">Shop GaN Series</a>
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-header">
+        <h2>Trending Now</h2>
+        <a href="/shop.html?sort=rating" class="text-navy" style="font-weight: 600;">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="product-grid" id="trending-products"></div>
+</section>
+
+<section class="section container">
+    <div class="section-header">
+        <h2>New Arrivals</h2>
+        <a href="/shop.html" class="text-navy" style="font-weight: 600;">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="product-grid" id="new-arrivals"></div>
+</section>
+
+<section class="section container">
+    <div class="section-header">
+        <h2>Flash Deals</h2>
+        <a href="/shop.html?category=Deals" class="text-navy" style="font-weight: 600;">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="product-grid" id="deals-container"></div>
+</section>
+
+<section class="section container">
+    <div class="section-header">
+        <h2>Best Sellers</h2>
+        <a href="/shop.html?sort=rating" class="text-navy" style="font-weight: 600;">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="product-grid" id="bestsellers-container"></div>
+</section>
+
+<section class="section" style="background-color: var(--color-white); margin-top: var(--spacing-section);">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="icon"><i class="fas fa-shipping-fast"></i></div>
+                <h4 class="mt-md">Fast Delivery</h4>
+                <p class="text-muted">Get your gear delivered in record time across the country.</p>
+            </div>
+            <div class="feature-item">
+                <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                <h4 class="mt-md">Secure Payments</h4>
+                <p class="text-muted">Your transactions are protected with industry-leading security.</p>
+            </div>
+            <div class="feature-item">
+                <div class="icon"><i class="fas fa-award"></i></div>
+                <h4 class="mt-md">Quality Guaranteed</h4>
+                <p class="text-muted">Premium products built to last and power your devices safely.</p>
+            </div>
+            <div class="feature-item">
+                <div class="icon"><i class="fas fa-undo"></i></div>
+                <h4 class="mt-md">Easy Returns</h4>
+                <p class="text-muted">Not satisfied? Return within 30 days for a full refund.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const productList = window.products || [];
+
+        function renderCard(product) {
+            const hasDiscount = product.discount > 0;
+            const badgeHtml = product.badge ? `<span class="badge ${product.badge === 'Sale' ? 'badge-sale' : (product.badge === 'New' ? 'badge-new' : 'badge-best')}">${product.badge}</span>` : '';
+            
+            return `
+                <div class="card product-card">
+                    <a href="/product.html?id=${product.id}" style="display:block;">
+                        <div class="card-img-wrap">
+                            <div class="badge-container">${badgeHtml}</div>
+                            <img src="${product.image}" loading="lazy" alt="${product.name}">
+                        </div>
+                    </a>
+                    <div class="card-body">
+                        <span class="product-category">${product.subcategory}</span>
+                        <a href="/product.html?id=${product.id}" class="product-title">${product.name}</a>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <span>${product.rating}</span>
+                            <span class="rating-count">(${product.reviews})</span>
+                        </div>
+                        <div class="product-price-row">
+                            <span class="price-current">${window.formatCurrency(product.price)}</span>
+                            ${hasDiscount ? `<span class="price-old">${window.formatCurrency(product.oldPrice)}</span>` : ''}
+                        </div>
+                        <button class="btn btn-outline btn-add-cart" onclick="addToCartEvent(${product.id})">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.addToCartEvent = function(id) {
+            const product = (window.products || []).find(p => p.id === id);
+            if (product && window.cart) {
+                window.cart.addItem(product, 1);
+            }
+        };
+
+        const renderSection = (id, items) => {
+            const container = document.getElementById(id);
+            if (container && items && items.length) {
+                container.innerHTML = items.map(renderCard).join('');
+            }
+        };
+
+        const mixCategories = (items) => {
+            const categories = [...new Set(items.map(product => product.category))];
+            const queues = categories.map(category => items.filter(product => product.category === category));
+            const mixed = [];
+            for (let index = 0; queues.some(queue => queue[index]); index += 1) {
+                queues.forEach(queue => {
+                    if (queue[index]) mixed.push(queue[index]);
+                });
+            }
+            return mixed;
+        };
+
+        if (productList.length) {
+            renderSection('featured-products', mixCategories(productList).slice(0, 10));
+            renderSection('trending-products', mixCategories([...productList].sort((a, b) => b.rating - a.rating)).slice(0, 10));
+            renderSection('new-arrivals', mixCategories(productList.filter(p => p.badge === 'New')).slice(0, 10));
+            renderSection('deals-container', mixCategories(productList.filter(p => p.discount >= 20)).slice(0, 10));
+            renderSection('bestsellers-container', mixCategories([...productList].sort((a, b) => b.reviews - a.reviews)).slice(0, 10));
+        }
+
+        const heroSlides = [
+            {
+                eyebrow: 'Trending now',
+                title: 'Fast charging essentials for every desk and journey.',
+                text: 'Premium chargers, power banks, and travel gear designed for modern life.',
+                cta: 'Shop tech essentials',
+                link: '/shop.html?category=Chargers',
+                image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                eyebrow: 'This week only',
+                title: 'Power up with smarter, sleeker gear.',
+                text: 'Get exclusive savings on premium accessories built to keep you connected.',
+                cta: 'Browse deals',
+                link: '/shop.html?category=Deals',
+                image: 'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                eyebrow: 'Hot picks',
+                title: 'Travel-ready gadgets that make daily life easier.',
+                text: 'Discover compact, durable favorites for work, travel, and home setups.',
+                cta: 'Explore essentials',
+                link: '/shop.html',
+                image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80'
+            }
+        ];
+
+        const heroCarousel = document.getElementById('hero-carousel');
+        if (heroCarousel) {
+            let activeIndex = 0;
+            const renderHero = () => {
+                heroCarousel.innerHTML = heroSlides.map((slide, index) => `
+                    <div class="hero-slide ${index === activeIndex ? 'active' : ''}">
+                        <div class="hero-copy">
+                            <span class="eyebrow">${slide.eyebrow}</span>
+                            <h1>${slide.title}</h1>
+                            <p>${slide.text}</p>
+                            <div class="hero-actions">
+                                <a href="${slide.link}" class="btn btn-primary">${slide.cta}</a>
+                                <a href="/shop.html" class="btn btn-outline" style="color: white; border-color: white;">Explore</a>
+                            </div>
+                            <div class="hero-metrics">
+                                <div><strong>12k+</strong><span>happy shoppers</span></div>
+                                <div><strong>4.8/5</strong><span>average rating</span></div>
+                                <div><strong>24h</strong><span>dispatch</span></div>
+                            </div>
+                        </div>
+                        <div class="hero-product-visual">
+                            <img src="${slide.image}" alt="${slide.title}">
+                            <div class="hero-badge">Up to 40% off</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                const dots = heroSlides.map((_, index) => `<button class="hero-dot ${index === activeIndex ? 'active' : ''}" data-index="${index}" aria-label="View slide ${index + 1}"></button>`).join('');
+                heroCarousel.insertAdjacentHTML('beforeend', `<div class="hero-dot-nav">${dots}</div>`);
+
+                document.querySelectorAll('.hero-dot').forEach(dot => {
+                    dot.addEventListener('click', () => {
+                        activeIndex = Number(dot.dataset.index);
+                        renderHero();
+                    });
+                });
+            };
+
+            renderHero();
+            setInterval(() => {
+                activeIndex = (activeIndex + 1) % heroSlides.length;
+                renderHero();
+            }, 4500);
+        }
+    });
+</script>
+{% endblock %}
